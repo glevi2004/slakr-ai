@@ -1,0 +1,388 @@
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  Dimensions,
+  TouchableOpacity,
+  Modal,
+} from "react-native";
+import dayjs from "dayjs";
+
+const { width } = Dimensions.get("window");
+// Account for: marginHorizontal (32) + padding (40) + day cell margins (28 = 4px between 7 cells)
+const AVAILABLE_WIDTH = width - 32 - 40 - 28;
+const CELL_SIZE = AVAILABLE_WIDTH / 7;
+
+type DayStatus = "earned" | "missed" | "future" | "today";
+
+interface CalendarGridProps {
+  currentMonth: dayjs.Dayjs;
+  studyData: { [key: string]: number }; // date string -> minutes studied
+}
+
+interface DayData {
+  date: string;
+  day: number | null;
+  status: DayStatus;
+  isToday: boolean;
+  minutesSeshed: number;
+}
+
+const DAYS_OF_WEEK = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
+
+export default function CalendarGrid({
+  currentMonth,
+  studyData,
+}: CalendarGridProps) {
+  const [selectedDay, setSelectedDay] = useState<DayData | null>(null);
+  const [showModal, setShowModal] = useState(false);
+
+  // Helper function to get minutes seshed for a specific date
+  const getMinutesForDate = (dateString: string): number => {
+    return studyData[dateString] || 0;
+  };
+
+  // Helper function to get heat map intensity based on minutes
+  const getHeatMapIntensity = (minutes: number): number => {
+    if (minutes === 0) return 0;
+    if (minutes <= 30) return 1;
+    if (minutes <= 60) return 2;
+    if (minutes <= 120) return 3;
+    return 4; // 2+ hours
+  };
+
+  const getDayStatus = (dateString: string): DayStatus => {
+    const today = dayjs().format("YYYY-MM-DD");
+    const targetDate = dayjs(dateString);
+    const todayDate = dayjs();
+
+    if (targetDate.isAfter(todayDate, "day")) {
+      return "future";
+    }
+
+    if (dateString === today) {
+      return "today";
+    }
+
+    // Check if there's study data for this date
+    const minutes = getMinutesForDate(dateString);
+    return minutes > 0 ? "earned" : "missed";
+  };
+
+  const generateCalendarData = (): DayData[] => {
+    const firstDay = currentMonth.startOf("month");
+    const daysInMonth = currentMonth.daysInMonth();
+    const dayOfWeek = firstDay.day(); // 0 is Sunday
+    const today = dayjs();
+
+    const data: DayData[] = [];
+
+    // Add empty cells for days before the first day of the month
+    for (let i = 0; i < dayOfWeek; i++) {
+      data.push({
+        date: "",
+        day: null,
+        status: "future",
+        isToday: false,
+        minutesSeshed: 0,
+      });
+    }
+
+    // Add the actual days of the month
+    for (let day = 1; day <= daysInMonth; day++) {
+      const date = currentMonth.date(day);
+      const dateString = date.format("YYYY-MM-DD");
+      const isToday = date.isSame(today, "day");
+      const status = getDayStatus(dateString);
+      const minutesSeshed = getMinutesForDate(dateString);
+
+      data.push({
+        date: dateString,
+        day,
+        status: isToday ? "today" : status,
+        isToday,
+        minutesSeshed,
+      });
+    }
+
+    return data;
+  };
+
+  const renderDayCell = ({ item }: { item: DayData }) => {
+    if (item.day === null) {
+      return <View style={styles.emptyCell} />;
+    }
+
+    const heatMapIntensity = getHeatMapIntensity(item.minutesSeshed);
+
+    const cellStyle = [
+      styles.dayCell,
+      item.status === "earned" && [
+        styles.earnedDay,
+        getHeatMapStyle(heatMapIntensity),
+      ],
+      item.status === "missed" && styles.missedDay,
+      item.status === "future" && styles.futureDay,
+      item.isToday && styles.todayBorder,
+      // Apply heat map styling for today if there are minutes studied
+      item.isToday &&
+        item.minutesSeshed > 0 &&
+        getHeatMapStyle(heatMapIntensity),
+    ];
+
+    const handleDayPress = () => {
+      if (item.minutesSeshed > 0 || item.isToday) {
+        setSelectedDay(item);
+        setShowModal(true);
+      }
+    };
+
+    return (
+      <TouchableOpacity style={cellStyle} onPress={handleDayPress}>
+        <Text
+          style={[
+            styles.dayText,
+            item.status === "earned" && styles.earnedText,
+            item.status === "missed" && styles.missedText,
+            item.status === "future" && styles.futureText,
+            item.isToday && styles.todayText,
+          ]}
+        >
+          {item.day}
+        </Text>
+
+        {/* Ash stamp for earned days and today with minutes */}
+        {((item.status === "earned" && item.minutesSeshed > 0) ||
+          (item.isToday && item.minutesSeshed > 0)) && (
+          <View style={styles.ashStamp}>
+            <Text style={styles.ashStampEmoji}>🔥</Text>
+          </View>
+        )}
+      </TouchableOpacity>
+    );
+  };
+
+  // Helper function to get heat map style based on intensity
+  const getHeatMapStyle = (intensity: number) => {
+    switch (intensity) {
+      case 1:
+        return { backgroundColor: "rgba(16, 185, 129, 0.2)" };
+      case 2:
+        return { backgroundColor: "rgba(16, 185, 129, 0.4)" };
+      case 3:
+        return { backgroundColor: "rgba(16, 185, 129, 0.6)" };
+      case 4:
+        return { backgroundColor: "rgba(16, 185, 129, 0.8)" };
+      default:
+        return {};
+    }
+  };
+
+  const renderHeader = () => {
+    return (
+      <View style={styles.headerContainer}>
+        <View style={styles.daysOfWeek}>
+          {DAYS_OF_WEEK.map((day, index) => (
+            <View key={index} style={styles.dayOfWeekCell}>
+              <Text
+                style={[
+                  styles.dayOfWeekText,
+                  { color: "rgba(255, 255, 255, 0.6)" },
+                ]}
+              >
+                {day}
+              </Text>
+            </View>
+          ))}
+        </View>
+      </View>
+    );
+  };
+
+  return (
+    <>
+      <View
+        style={[
+          styles.container,
+          {
+            backgroundColor: "#1A1A1A",
+            borderColor: "rgba(255, 255, 255, 0.1)",
+          },
+        ]}
+      >
+        <View style={styles.content}>
+          {renderHeader()}
+          <FlatList
+            data={generateCalendarData()}
+            renderItem={renderDayCell}
+            numColumns={7}
+            scrollEnabled={false}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.calendarGrid}
+          />
+        </View>
+      </View>
+
+      {/* Day Details Modal */}
+      <Modal
+        visible={showModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowModal(false)}
+      >
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setShowModal(false)}
+        >
+          <View style={styles.modalContent}>
+            {selectedDay && (
+              <>
+                <Text style={styles.modalTitle}>
+                  {dayjs(selectedDay.date).format("MMMM D, YYYY")}
+                </Text>
+                <Text style={styles.modalMinutes}>
+                  {selectedDay.minutesSeshed} minutes studied
+                </Text>
+                <TouchableOpacity
+                  style={styles.modalCloseButton}
+                  onPress={() => setShowModal(false)}
+                >
+                  <Text style={styles.modalCloseText}>Close</Text>
+                </TouchableOpacity>
+              </>
+            )}
+          </View>
+        </TouchableOpacity>
+      </Modal>
+    </>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    marginHorizontal: 16,
+    marginVertical: 8,
+    borderRadius: 16,
+    borderWidth: 1,
+    overflow: "hidden",
+  },
+  content: {
+    padding: 20,
+  },
+  headerContainer: {
+    marginBottom: 16,
+  },
+  daysOfWeek: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  dayOfWeekCell: {
+    width: CELL_SIZE,
+    height: 30,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  dayOfWeekText: {
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  calendarGrid: {
+    flexGrow: 1,
+  },
+  emptyCell: {
+    width: CELL_SIZE,
+    height: CELL_SIZE,
+    margin: 2,
+  },
+  dayCell: {
+    width: CELL_SIZE,
+    height: CELL_SIZE,
+    margin: 2,
+    borderRadius: 12,
+    justifyContent: "center",
+    alignItems: "center",
+    position: "relative",
+    backgroundColor: "rgba(255, 255, 255, 0.05)",
+  },
+  earnedDay: {
+    backgroundColor: "rgba(16, 185, 129, 0.2)",
+  },
+  missedDay: {
+    backgroundColor: "rgba(239, 68, 68, 0.1)",
+  },
+  futureDay: {
+    backgroundColor: "rgba(255, 255, 255, 0.02)",
+  },
+  todayBorder: {
+    borderWidth: 2,
+    borderColor: "#3B82F6",
+  },
+  dayText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#FFFFFF",
+  },
+  earnedText: {
+    color: "#10B981",
+  },
+  missedText: {
+    color: "rgba(255, 255, 255, 0.4)",
+  },
+  futureText: {
+    color: "rgba(255, 255, 255, 0.3)",
+  },
+  todayText: {
+    color: "#3B82F6",
+  },
+  ashStamp: {
+    position: "absolute",
+    top: 2,
+    right: 2,
+    width: 16,
+    height: 16,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  ashStampEmoji: {
+    fontSize: 10,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContent: {
+    backgroundColor: "#1A1A1A",
+    borderRadius: 16,
+    padding: 24,
+    alignItems: "center",
+    marginHorizontal: 32,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.1)",
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#FFFFFF",
+    marginBottom: 8,
+  },
+  modalMinutes: {
+    fontSize: 16,
+    color: "rgba(255, 255, 255, 0.8)",
+    marginBottom: 16,
+  },
+  modalCloseButton: {
+    backgroundColor: "#3B82F6",
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  modalCloseText: {
+    color: "#FFFFFF",
+    fontWeight: "600",
+  },
+});
