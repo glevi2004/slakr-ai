@@ -267,4 +267,40 @@ export class StreakService {
       return 0;
     }
   }
+
+  /**
+   * Get daily study data for calendar display using daily_stats table
+   */
+  static async getDailyStudyData(
+    userId: string,
+    startDate: string,
+    endDate: string
+  ): Promise<{ [key: string]: number }> {
+    try {
+      const { data, error } = await supabase
+        .from("daily_stats")
+        .select("date, total_study_time_seconds")
+        .eq("user_id", userId)
+        .gte("date", startDate)
+        .lte("date", endDate)
+        .order("date", { ascending: true });
+
+      if (error) {
+        console.error("Error getting daily study data:", error);
+        return {};
+      }
+
+      // Convert to the format expected by the calendar (date -> minutes)
+      const result: { [key: string]: number } = {};
+      data.forEach((stat) => {
+        const minutes = Math.floor(stat.total_study_time_seconds / 60);
+        result[stat.date] = minutes;
+      });
+
+      return result;
+    } catch (error) {
+      console.error("Error getting daily study data:", error);
+      return {};
+    }
+  }
 }

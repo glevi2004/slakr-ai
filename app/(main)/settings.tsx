@@ -43,7 +43,10 @@ export default function SettingsPage() {
 
   useEffect(() => {
     const loadData = async () => {
-      if (!user?.id || !user?.email) return;
+      if (!user?.id || !user?.email) {
+        setLoading(false);
+        return;
+      }
 
       try {
         setLoading(true);
@@ -126,10 +129,13 @@ export default function SettingsPage() {
         onPress: async () => {
           try {
             await signOut();
+            // Navigate to auth homepage where user can choose login/register
+            router.replace("/(tabs)");
           } catch (error) {
             console.error("Error signing out:", error);
             // Force sign out locally even if network fails
             Alert.alert("Signed Out", "You have been signed out locally.");
+            router.replace("/(tabs)");
           }
         },
       },

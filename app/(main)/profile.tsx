@@ -16,6 +16,7 @@ import {
   TrendingUp,
 } from "lucide-react-native";
 import { useRouter } from "expo-router";
+import { useFocusEffect } from "@react-navigation/native";
 import { AppBackground } from "@/components/AppBackground";
 import { useAuth } from "@/contexts/AuthContext";
 import { ProfileService, UserProfile } from "@/services/profileService";
@@ -34,7 +35,10 @@ export default function ProfilePage() {
 
   useEffect(() => {
     const loadData = async () => {
-      if (!user?.id || !user?.email) return;
+      if (!user?.id || !user?.email) {
+        setLoading(false);
+        return;
+      }
 
       try {
         setLoading(true);
@@ -67,6 +71,41 @@ export default function ProfilePage() {
 
     loadData();
   }, [user]);
+
+  // Refresh data when screen comes into focus (e.g., after completing a session or updating profile)
+  useFocusEffect(
+    React.useCallback(() => {
+      if (user?.id && user?.email) {
+        const refreshData = async () => {
+          try {
+            // Load fresh profile and streak data
+            const [userProfile, userStreaks] = await Promise.all([
+              ProfileService.getOrCreateUserProfile(user.id!, user.email!),
+              StreakService.getUserStreaks(user.id!),
+            ]);
+
+            if (userProfile) {
+              setProfile(userProfile);
+            }
+
+            if (userStreaks) {
+              setStreakStats({
+                currentStreak: userStreaks.current_streak,
+                longestStreak: userStreaks.longest_streak,
+                totalStudyTime: Math.round(
+                  userStreaks.total_study_time_seconds / 60
+                ),
+              });
+            }
+          } catch (error) {
+            console.error("Error refreshing profile data:", error);
+          }
+        };
+
+        refreshData();
+      }
+    }, [user])
+  );
 
   const formatTime = (minutes: number): string => {
     if (minutes < 60) {

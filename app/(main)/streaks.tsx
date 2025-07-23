@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   View,
   Text,
@@ -14,7 +14,10 @@ import {
   Award,
 } from "lucide-react-native";
 import dayjs from "dayjs";
+import { useFocusEffect } from "@react-navigation/native";
 import { AppBackground } from "@/components/AppBackground";
+import { useAuth } from "@/contexts/AuthContext";
+import { StreakService } from "@/services/streakService";
 import Hero from "@/components/streaks/Hero";
 import StatsChip from "@/components/streaks/StatsChip";
 import CalendarGrid from "@/components/streaks/CalendarGrid";
@@ -35,6 +38,7 @@ const months = [
 ];
 
 export default function StreaksPage() {
+  const { user } = useAuth();
   const [currentMonth, setCurrentMonth] = useState(dayjs());
   const [streakStats, setStreakStats] = useState({
     totalMinutes: 0,
@@ -42,31 +46,86 @@ export default function StreaksPage() {
     longestStreak: 0,
   });
   const [studyData, setStudyData] = useState<{ [key: string]: number }>({});
+  const [loading, setLoading] = useState(true);
 
-  // Mock data for now - replace with actual data fetching
+  // Load streak and calendar data
   useEffect(() => {
-    const mockData = () => {
-      setStreakStats({
-        totalMinutes: 1250,
-        currentStreak: 5,
-        longestStreak: 12,
-      });
-
-      // Mock study data for calendar
-      const mockStudyData: { [key: string]: number } = {};
-      // Add some random study sessions for demo
-      for (let i = 1; i <= 30; i++) {
-        const date = dayjs().date(i).format("YYYY-MM-DD");
-        if (Math.random() > 0.3) {
-          // 70% chance of study session
-          mockStudyData[date] = Math.floor(Math.random() * 120) + 30; // 30-150 minutes
-        }
+    const loadData = async () => {
+      if (!user?.id) {
+        setLoading(false);
+        return;
       }
-      setStudyData(mockStudyData);
+
+      try {
+        setLoading(true);
+
+        // Get current month date range
+        const startDate = currentMonth.startOf("month").format("YYYY-MM-DD");
+        const endDate = currentMonth.endOf("month").format("YYYY-MM-DD");
+
+        // Load streak stats and daily study data in parallel
+        const [userStreaks, dailyData] = await Promise.all([
+          StreakService.getUserStreaks(user.id),
+          StreakService.getDailyStudyData(user.id, startDate, endDate),
+        ]);
+
+        if (userStreaks) {
+          setStreakStats({
+            totalMinutes: Math.round(userStreaks.total_study_time_seconds / 60),
+            currentStreak: userStreaks.current_streak,
+            longestStreak: userStreaks.longest_streak,
+          });
+        }
+
+        setStudyData(dailyData);
+      } catch (error) {
+        console.error("Error loading streak data:", error);
+      } finally {
+        setLoading(false);
+      }
     };
 
-    mockData();
-  }, []);
+    loadData();
+  }, [user, currentMonth]); // Re-fetch when month changes
+
+  // Refresh data when screen comes into focus (e.g., after completing a session)
+  useFocusEffect(
+    React.useCallback(() => {
+      if (user?.id) {
+        const refreshData = async () => {
+          try {
+            // Get current month date range
+            const startDate = currentMonth
+              .startOf("month")
+              .format("YYYY-MM-DD");
+            const endDate = currentMonth.endOf("month").format("YYYY-MM-DD");
+
+            // Load fresh streak stats and daily study data
+            const [userStreaks, dailyData] = await Promise.all([
+              StreakService.getUserStreaks(user.id),
+              StreakService.getDailyStudyData(user.id, startDate, endDate),
+            ]);
+
+            if (userStreaks) {
+              setStreakStats({
+                totalMinutes: Math.round(
+                  userStreaks.total_study_time_seconds / 60
+                ),
+                currentStreak: userStreaks.current_streak,
+                longestStreak: userStreaks.longest_streak,
+              });
+            }
+
+            setStudyData(dailyData);
+          } catch (error) {
+            console.error("Error refreshing streak data:", error);
+          }
+        };
+
+        refreshData();
+      }
+    }, [user, currentMonth])
+  );
 
   const handlePrevMonth = () => {
     setCurrentMonth(currentMonth.subtract(1, "month"));
@@ -98,50 +157,64 @@ export default function StreaksPage() {
           <Text style={[styles.headerTitle, { color: "#FFFFFF" }]}>Streak</Text>
         </View>
 
-        {/* Hero Section */}
-        <Hero currentStreak={streakStats.currentStreak} />
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <Text style={styles.loadingText}>Loading streaks...</Text>
+          </View>
+        ) : (
+          <>
+            {/* Hero Section */}
+            <Hero currentStreak={streakStats.currentStreak} />
 
-        {/* Stats Strip */}
-        <View style={styles.statsContainer}>
-          <StatsChip
-            icon={Clock}
-            iconColor="#3B82F6"
-            label="Total Minutes"
-            value={streakStats.totalMinutes}
-            suffix="m"
-          />
-          <StatsChip
-            icon={TrendingUp}
-            iconColor="#10B981"
-            label="Avg/Day"
-            value={avgMinutesPerDay}
-            suffix="m"
-          />
-          <StatsChip
-            icon={Award}
-            iconColor="#F59E0B"
-            label="Best Streak"
-            value={streakStats.longestStreak}
-          />
-        </View>
+            {/* Stats Strip */}
+            <View style={styles.statsContainer}>
+              <StatsChip
+                icon={Clock}
+                iconColor="#3B82F6"
+                label="Total Minutes"
+                value={streakStats.totalMinutes}
+                suffix="m"
+              />
+              <StatsChip
+                icon={TrendingUp}
+                iconColor="#10B981"
+                label="Avg/Day"
+                value={avgMinutesPerDay}
+                suffix="m"
+              />
+              <StatsChip
+                icon={Award}
+                iconColor="#F59E0B"
+                label="Best Streak"
+                value={streakStats.longestStreak}
+              />
+            </View>
 
-        {/* Month Selector */}
-        <View style={styles.monthSelector}>
-          <TouchableOpacity onPress={handlePrevMonth} style={styles.monthArrow}>
-            <ArrowLeft color="#FFFFFF" size={24} />
-          </TouchableOpacity>
+            {/* Month Selector */}
+            <View style={styles.monthSelector}>
+              <TouchableOpacity
+                onPress={handlePrevMonth}
+                style={styles.monthArrow}
+              >
+                <ArrowLeft color="#FFFFFF" size={24} />
+              </TouchableOpacity>
 
-          <Text style={[styles.monthText, { color: "#FFFFFF" }]}>
-            {months[currentMonth.month()]} {currentMonth.year()}
-          </Text>
+              <Text style={[styles.monthText, { color: "#FFFFFF" }]}>
+                {months[currentMonth.month()]} {currentMonth.year()}
+              </Text>
 
-          <TouchableOpacity onPress={handleNextMonth} style={styles.monthArrow}>
-            <ArrowRight color="#FFFFFF" size={24} />
-          </TouchableOpacity>
-        </View>
+              <TouchableOpacity
+                onPress={handleNextMonth}
+                style={styles.monthArrow}
+              >
+                <ArrowRight color="#FFFFFF" size={24} />
+              </TouchableOpacity>
+            </View>
 
-        {/* Calendar Grid */}
-        <CalendarGrid currentMonth={currentMonth} studyData={studyData} />
+            {/* Calendar Grid */}
+            <CalendarGrid currentMonth={currentMonth} studyData={studyData} />
+          </>
+        )}
 
         <View style={styles.bottomSpacer} />
       </ScrollView>
@@ -152,6 +225,17 @@ export default function StreaksPage() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 40,
+  },
+  loadingText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "500",
   },
   header: {
     flexDirection: "row",

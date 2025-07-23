@@ -1,4 +1,7 @@
 import { supabase } from "../lib/supabase";
+import { StreakService } from "./streakService";
+import { DailyStatsService } from "./dailyStatsService";
+import { presenceService } from "./presenceService";
 
 export interface StudySession {
   id: string;
@@ -31,6 +34,9 @@ export class SessionService {
         console.error("Error creating session:", error);
         return null;
       }
+
+      // Set studying presence status
+      await presenceService.setStudyingStatus(true);
 
       return data;
     } catch (error) {
@@ -85,6 +91,9 @@ export class SessionService {
         return false;
       }
 
+      // Set presence to online when paused
+      await presenceService.setStudyingStatus(false);
+
       return true;
     } catch (error) {
       console.error("Error pausing session:", error);
@@ -110,6 +119,9 @@ export class SessionService {
         return false;
       }
 
+      // Set presence to studying when resumed
+      await presenceService.setStudyingStatus(true);
+
       return true;
     } catch (error) {
       console.error("Error resuming session:", error);
@@ -118,14 +130,29 @@ export class SessionService {
   }
 
   /**
-   * Complete a session
+   * Complete a session and update related stats
    */
   static async completeSession(
     sessionId: string,
     finalDuration: number
   ): Promise<boolean> {
     try {
-      const { error } = await supabase
+      console.log(
+        "🏁 Completing session:",
+        sessionId,
+        "Duration:",
+        finalDuration
+      );
+
+      // First get the session to get user_id and date
+      const session = await this.getSession(sessionId);
+      if (!session) {
+        console.error("❌ Session not found:", sessionId);
+        return false;
+      }
+
+      // Update the session status
+      const { error: sessionError } = await supabase
         .from("study_sessions")
         .update({
           status: "completed",
@@ -135,14 +162,54 @@ export class SessionService {
         })
         .eq("id", sessionId);
 
-      if (error) {
-        console.error("Error completing session:", error);
+      if (sessionError) {
+        console.error("❌ Error completing session:", sessionError);
         return false;
       }
 
+      console.log("✅ Session completed successfully");
+
+      // Extract date from session start time
+      const sessionDate = session.started_at.split("T")[0]; // YYYY-MM-DD
+
+      // Update daily stats (only if session is meaningful - 30+ seconds)
+      if (finalDuration >= 30) {
+        console.log("📊 Updating daily stats and streaks...");
+
+        // Update daily stats and streaks in parallel
+        const [dailyStatsResult, streakResult] = await Promise.all([
+          DailyStatsService.updateDailyStats(
+            session.user_id,
+            sessionDate,
+            finalDuration,
+            1
+          ),
+          StreakService.updateUserStreaks(session.user_id, finalDuration),
+        ]);
+
+        if (!dailyStatsResult) {
+          console.warn(
+            "⚠️ Failed to update daily stats, but session was completed"
+          );
+        }
+
+        if (!streakResult) {
+          console.warn(
+            "⚠️ Failed to update streaks, but session was completed"
+          );
+        }
+
+        console.log("✅ All stats updated successfully");
+      } else {
+        console.log("⏱️ Session too short (<30s), skipping stats update");
+      }
+
+      // Reset presence status to online after completing study session
+      await presenceService.setStudyingStatus(false);
+
       return true;
     } catch (error) {
-      console.error("Error completing session:", error);
+      console.error("❌ Error completing session:", error);
       return false;
     }
   }

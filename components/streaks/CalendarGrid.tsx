@@ -46,11 +46,12 @@ export default function CalendarGrid({
 
   // Helper function to get heat map intensity based on minutes
   const getHeatMapIntensity = (minutes: number): number => {
-    if (minutes === 0) return 0;
-    if (minutes <= 30) return 1;
-    if (minutes <= 60) return 2;
-    if (minutes <= 120) return 3;
-    return 4; // 2+ hours
+    if (minutes === 0) return 0; // None
+    if (minutes >= 1 && minutes <= 29) return 1; // Spark
+    if (minutes >= 30 && minutes <= 59) return 2; // Ember
+    if (minutes >= 60 && minutes <= 119) return 3; // Flame
+    if (minutes >= 120 && minutes <= 239) return 4; // Blaze
+    return 5; // Inferno (240+)
   };
 
   const getDayStatus = (dateString: string): DayStatus => {
@@ -167,16 +168,20 @@ export default function CalendarGrid({
   // Helper function to get heat map style based on intensity
   const getHeatMapStyle = (intensity: number) => {
     switch (intensity) {
+      case 0:
+        return { backgroundColor: "#2B2B2B" }; // None - grid background
       case 1:
-        return { backgroundColor: "rgba(16, 185, 129, 0.2)" };
+        return { backgroundColor: "#442100" }; // Spark (1-29 min)
       case 2:
-        return { backgroundColor: "rgba(16, 185, 129, 0.4)" };
+        return { backgroundColor: "#8C3700" }; // Ember (30-59 min)
       case 3:
-        return { backgroundColor: "rgba(16, 185, 129, 0.6)" };
+        return { backgroundColor: "#FF5400" }; // Flame (60-119 min)
       case 4:
-        return { backgroundColor: "rgba(16, 185, 129, 0.8)" };
+        return { backgroundColor: "#FF7E2D" }; // Blaze (120-239 min)
+      case 5:
+        return { backgroundColor: "#FFB84C" }; // Inferno (240+ min)
       default:
-        return {};
+        return { backgroundColor: "#2B2B2B" };
     }
   };
 

@@ -42,27 +42,6 @@ export default function MainTabLayout() {
           headerShown: false,
         }}
       />
-      <Tabs.Screen
-        name="edit-profile"
-        options={{
-          href: null, // Hide from tab bar
-          headerShown: false,
-        }}
-      />
-      <Tabs.Screen
-        name="complete-profile"
-        options={{
-          href: null, // Hide from tab bar
-          headerShown: false,
-        }}
-      />
-      <Tabs.Screen
-        name="badges"
-        options={{
-          href: null, // Hide from tab bar
-          headerShown: false,
-        }}
-      />
     </Tabs>
   );
 }
