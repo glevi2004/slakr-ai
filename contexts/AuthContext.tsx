@@ -75,8 +75,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    return { error };
+    try {
+      console.log("🚪 Attempting to sign out...");
+      const { error } = await supabase.auth.signOut();
+
+      if (error) {
+        console.error("❌ Supabase signOut error:", error);
+
+        // If it's a network error, we still want to clear local session
+        if (error.message?.includes("Network request failed")) {
+          console.log("🔄 Network error detected, clearing local session...");
+          // Force clear local state
+          setUser(null);
+          setSession(null);
+          return { error: null }; // Return success since we cleared locally
+        }
+
+        return { error };
+      }
+
+      console.log("✅ Successfully signed out");
+      return { error: null };
+    } catch (networkError) {
+      console.error("❌ Network error during signOut:", networkError);
+
+      // On network failure, clear local session anyway
+      console.log("🔄 Clearing local session due to network error...");
+      setUser(null);
+      setSession(null);
+
+      // Return success since we cleared the local session
+      return { error: null };
+    }
   };
 
   const value = {

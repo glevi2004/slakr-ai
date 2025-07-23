@@ -1,6 +1,5 @@
 {
   "expo": {
-    // "scheme": "com.supabase",
     "name": "slakr-ai",
     "slug": "slakr-ai",
     "version": "1.0.0",
@@ -10,7 +9,8 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.glevi.slakr-ai"
     },
     "android": {
       "adaptiveIcon": {
