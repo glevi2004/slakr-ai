@@ -46,28 +46,21 @@ export default function StreaksPage() {
     longestStreak: 0,
   });
   const [studyData, setStudyData] = useState<{ [key: string]: number }>({});
-  const [loading, setLoading] = useState(true);
+  const [streakStatsLoading, setStreakStatsLoading] = useState(true);
+  const [monthDataLoading, setMonthDataLoading] = useState(false);
 
-  // Load streak and calendar data
+  // Load streak stats once (global user data)
   useEffect(() => {
-    const loadData = async () => {
+    const loadStreakStats = async () => {
       if (!user?.id) {
-        setLoading(false);
+        setStreakStatsLoading(false);
         return;
       }
 
       try {
-        setLoading(true);
+        setStreakStatsLoading(true);
 
-        // Get current month date range
-        const startDate = currentMonth.startOf("month").format("YYYY-MM-DD");
-        const endDate = currentMonth.endOf("month").format("YYYY-MM-DD");
-
-        // Load streak stats and daily study data in parallel
-        const [userStreaks, dailyData] = await Promise.all([
-          StreakService.getUserStreaks(user.id),
-          StreakService.getDailyStudyData(user.id, startDate, endDate),
-        ]);
+        const userStreaks = await StreakService.getUserStreaks(user.id);
 
         if (userStreaks) {
           setStreakStats({
@@ -76,17 +69,44 @@ export default function StreaksPage() {
             longestStreak: userStreaks.longest_streak,
           });
         }
-
-        setStudyData(dailyData);
       } catch (error) {
-        console.error("Error loading streak data:", error);
+        console.error("Error loading streak stats:", error);
       } finally {
-        setLoading(false);
+        setStreakStatsLoading(false);
       }
     };
 
-    loadData();
-  }, [user, currentMonth]); // Re-fetch when month changes
+    loadStreakStats();
+  }, [user?.id]); // Only reload when user changes
+
+  // Load monthly calendar data when month changes
+  useEffect(() => {
+    const loadMonthData = async () => {
+      if (!user?.id) return;
+
+      try {
+        setMonthDataLoading(true);
+
+        // Get current month date range
+        const startDate = currentMonth.startOf("month").format("YYYY-MM-DD");
+        const endDate = currentMonth.endOf("month").format("YYYY-MM-DD");
+
+        const dailyData = await StreakService.getDailyStudyData(
+          user.id,
+          startDate,
+          endDate
+        );
+
+        setStudyData(dailyData);
+      } catch (error) {
+        console.error("Error loading monthly data:", error);
+      } finally {
+        setMonthDataLoading(false);
+      }
+    };
+
+    loadMonthData();
+  }, [user?.id, currentMonth]); // Reload when user or month changes
 
   // Refresh data when screen comes into focus (e.g., after completing a session)
   useFocusEffect(
@@ -157,7 +177,7 @@ export default function StreaksPage() {
           <Text style={[styles.headerTitle, { color: "#FFFFFF" }]}>Streak</Text>
         </View>
 
-        {loading ? (
+        {streakStatsLoading ? (
           <View style={styles.loadingContainer}>
             <Text style={styles.loadingText}>Loading streaks...</Text>
           </View>
@@ -277,6 +297,6 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   bottomSpacer: {
-    height: 80,
+    height: 110,
   },
 });

@@ -25,6 +25,17 @@ import { useRouter } from "expo-router";
 import { AppBackground } from "@/components/AppBackground";
 import { useAuth } from "@/contexts/AuthContext";
 import { ProfileService, UserProfile } from "@/services/profileService";
+import SearchableDropdown from "@/components/ui/SearchableDropdown";
+
+const GRADE_OPTIONS = [
+  "Freshman",
+  "Sophomore",
+  "Junior",
+  "Senior",
+  "Graduate Student",
+  "PhD Student",
+  "Other",
+];
 
 export default function SettingsPage() {
   const { user, signOut } = useAuth();
@@ -148,7 +159,8 @@ export default function SettingsPage() {
     value: string,
     placeholder: string,
     field: keyof typeof editForm,
-    multiline: boolean = false
+    multiline: boolean = false,
+    isGradeField: boolean = false
   ) => (
     <View style={styles.fieldContainer}>
       <View style={styles.fieldHeader}>
@@ -156,15 +168,26 @@ export default function SettingsPage() {
         <Text style={styles.fieldLabel}>{label}</Text>
       </View>
       {isEditing ? (
-        <TextInput
-          style={[styles.textInput, multiline && styles.textInputMultiline]}
-          value={editForm[field]}
-          onChangeText={(text) => setEditForm({ ...editForm, [field]: text })}
-          placeholder={placeholder}
-          placeholderTextColor="rgba(255, 255, 255, 0.5)"
-          multiline={multiline}
-          numberOfLines={multiline ? 3 : 1}
-        />
+        isGradeField ? (
+          <View style={styles.dropdownContainer}>
+            <SearchableDropdown
+              options={GRADE_OPTIONS}
+              value={editForm[field]}
+              onSelect={(value) => setEditForm({ ...editForm, [field]: value })}
+              placeholder={placeholder}
+            />
+          </View>
+        ) : (
+          <TextInput
+            style={[styles.textInput, multiline && styles.textInputMultiline]}
+            value={editForm[field]}
+            onChangeText={(text) => setEditForm({ ...editForm, [field]: text })}
+            placeholder={placeholder}
+            placeholderTextColor="rgba(255, 255, 255, 0.5)"
+            multiline={multiline}
+            numberOfLines={multiline ? 3 : 1}
+          />
+        )
       ) : (
         <Text style={styles.fieldValue}>
           {value || `No ${label.toLowerCase()} set`}
@@ -282,8 +305,10 @@ export default function SettingsPage() {
             <GraduationCap color="#8B5CF6" size={20} />,
             "Grade",
             profile?.grade || "",
-            "Enter your grade level (e.g., Freshman, Senior)",
-            "grade"
+            "Select your grade level",
+            "grade",
+            false,
+            true // isGradeField
           )}
 
           {renderProfileField(
@@ -531,5 +556,8 @@ const styles = StyleSheet.create({
   },
   bottomSpacer: {
     height: 100,
+  },
+  dropdownContainer: {
+    marginLeft: 28,
   },
 });

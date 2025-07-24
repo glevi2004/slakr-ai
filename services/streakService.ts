@@ -1,4 +1,5 @@
 import { supabase } from "../lib/supabase";
+import { router } from "expo-router";
 
 export interface UserStreak {
   user_id: string;
@@ -11,6 +12,32 @@ export interface UserStreak {
 }
 
 export class StreakService {
+  /**
+   * Handle network errors by clearing session and redirecting
+   */
+  private static handleNetworkError(error: any) {
+    const isNetworkError =
+      error?.message?.includes("Network request failed") ||
+      error?.message?.includes("fetch") ||
+      error?.code === "NETWORK_ERROR" ||
+      error?.name === "NetworkError";
+
+    if (isNetworkError) {
+      console.log(
+        "🔄 StreakService: Network error detected, clearing session and redirecting..."
+      );
+
+      // Clear the user session
+      supabase.auth.signOut();
+
+      // Redirect to index (which will route to landing page)
+      try {
+        router.replace("/");
+      } catch (redirectError) {
+        console.error("Error redirecting:", redirectError);
+      }
+    }
+  }
   /**
    * Get user streak data
    */
@@ -25,6 +52,7 @@ export class StreakService {
       if (error && error.code !== "PGRST116") {
         // PGRST116 = no rows returned
         console.error("Error getting user streaks:", error);
+        this.handleNetworkError(error);
         return null;
       }
 
@@ -36,6 +64,7 @@ export class StreakService {
       return data;
     } catch (error) {
       console.error("Error getting user streaks:", error);
+      this.handleNetworkError(error);
       return null;
     }
   }
@@ -59,12 +88,14 @@ export class StreakService {
 
       if (error) {
         console.error("Error creating user streaks:", error);
+        this.handleNetworkError(error);
         return null;
       }
 
       return data;
     } catch (error) {
       console.error("Error creating user streaks:", error);
+      this.handleNetworkError(error);
       return null;
     }
   }

@@ -21,18 +21,15 @@ export function AuthGuard({ children }: AuthGuardProps) {
 
     if (!user) {
       // User is not authenticated
-      if (!inAuthGroup) {
-        // Redirect any unauthenticated route to the auth screens
-        router.replace("/(auth)" as any);
+      if (!inAuthGroup && !inTabsGroup) {
+        // Redirect unauthenticated users to landing page
+        router.replace("/(tabs)" as any);
       }
-      // If already in auth group, stay there
+      // If already in auth or tabs group, stay there
     } else {
       // User is authenticated
-      if (inAuthGroup) {
-        // Redirect from auth to main app
-        router.replace("/(main)" as any);
-      } else if (inTabsGroup) {
-        // Redirect from old tabs to main app
+      if (inAuthGroup || inTabsGroup) {
+        // Redirect from auth or landing to main app
         router.replace("/(main)" as any);
       }
       // If already in main group, stay there

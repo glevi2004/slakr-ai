@@ -6,6 +6,7 @@ import { Image } from "expo-image";
 import { Bell } from "lucide-react-native";
 import Timer from "@/components/Timer";
 import StreakCard from "@/components/StreakCard";
+import FriendsCard from "@/components/FriendsCard";
 
 export default function MainHomePage() {
   return (
@@ -18,6 +19,7 @@ export default function MainHomePage() {
 
         <ScrollView
           style={styles.container}
+          contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
           {/* Logo Header */}
@@ -39,6 +41,9 @@ export default function MainHomePage() {
           <View style={styles.content}>
             {/* Study Timer Component */}
             <Timer />
+
+            {/* Friends Card Component */}
+            <FriendsCard />
           </View>
         </ScrollView>
       </AppBackground>
@@ -53,6 +58,9 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 100,
   },
   content: {
     padding: 20,

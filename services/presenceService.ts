@@ -1,5 +1,6 @@
 import { supabase } from "../lib/supabase";
 import { AppState, AppStateStatus } from "react-native";
+import { router } from "expo-router";
 
 export type OnlineStatus = "online" | "away" | "offline" | "studying";
 
@@ -58,6 +59,7 @@ export class PresenceService {
 
       if (error) {
         console.error("Error updating online status:", error);
+        this.handleNetworkError(error);
         return false;
       }
 
@@ -65,6 +67,7 @@ export class PresenceService {
       return true;
     } catch (error) {
       console.error("Error updating online status:", error);
+      this.handleNetworkError(error);
       return false;
     }
   }
@@ -96,6 +99,36 @@ export class PresenceService {
   }
 
   /**
+   * Handle network errors by clearing session and redirecting
+   */
+  private handleNetworkError(error: any) {
+    const isNetworkError =
+      error?.message?.includes("Network request failed") ||
+      error?.message?.includes("fetch") ||
+      error?.code === "NETWORK_ERROR" ||
+      error?.name === "NetworkError";
+
+    if (isNetworkError) {
+      console.log(
+        "🔄 Network error detected, clearing session and redirecting..."
+      );
+
+      // Clear the user session
+      supabase.auth.signOut();
+
+      // Stop presence service
+      this.cleanup();
+
+      // Redirect to index (which will route to landing page)
+      try {
+        router.replace("/");
+      } catch (redirectError) {
+        console.error("Error redirecting:", redirectError);
+      }
+    }
+  }
+
+  /**
    * Update last seen timestamp without changing status
    */
   private async updateLastSeen(): Promise<boolean> {
@@ -111,12 +144,14 @@ export class PresenceService {
 
       if (error) {
         console.error("Error updating last seen:", error);
+        this.handleNetworkError(error);
         return false;
       }
 
       return true;
     } catch (error) {
       console.error("Error updating last seen:", error);
+      this.handleNetworkError(error);
       return false;
     }
   }

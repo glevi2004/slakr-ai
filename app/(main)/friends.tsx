@@ -30,6 +30,7 @@ import {
   UserSearchResult,
 } from "@/services/friendsService";
 import { presenceService } from "@/services/presenceService";
+import { useRouter } from "expo-router";
 
 type TabType = "friends" | "requests" | "search";
 
@@ -90,6 +91,7 @@ const getActualOnlineStatus = (
 
 export default function FriendsPage() {
   const { user } = useAuth();
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<TabType>("friends");
   const [friends, setFriends] = useState<FriendWithProfile[]>([]);
   const [pendingRequests, setPendingRequests] = useState<{
@@ -100,6 +102,7 @@ export default function FriendsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [refreshing, setRefreshing] = useState(false);
   const [presenceSubscription, setPresenceSubscription] = useState<any>(null);
+  const [showTooltip, setShowTooltip] = useState(false);
 
   const loadFriendsData = React.useCallback(async () => {
     if (!user?.id) return;
@@ -279,7 +282,12 @@ export default function FriendsPage() {
     );
 
     return (
-      <View key={friend.id} style={styles.userItem}>
+      <TouchableOpacity
+        key={friend.id}
+        style={styles.userItem}
+        onPress={() => router.push(`/(profile)/${friend.id}`)}
+        activeOpacity={0.7}
+      >
         <View style={styles.avatarContainer}>
           {friend.avatar_url ? (
             <Image source={{ uri: friend.avatar_url }} style={styles.avatar} />
@@ -325,11 +333,14 @@ export default function FriendsPage() {
         </View>
         <TouchableOpacity
           style={styles.removeButton}
-          onPress={() => handleRemoveFriend(friend.relationship_id)}
+          onPress={(e) => {
+            e.stopPropagation();
+            handleRemoveFriend(friend.relationship_id);
+          }}
         >
           <UserMinus color="#EF4444" size={20} />
         </TouchableOpacity>
-      </View>
+      </TouchableOpacity>
     );
   };
 
@@ -436,6 +447,28 @@ export default function FriendsPage() {
               <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
             }
           >
+            {friends.length > 0 && (
+              <View>
+                <TouchableOpacity
+                  style={styles.friendsCounter}
+                  onPress={() => setShowTooltip(!showTooltip)}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.friendsCounterText}>
+                    {friends.length}{" "}
+                    {friends.length === 1 ? "Friend" : "Friends"}
+                  </Text>
+                  {showTooltip && (
+                    <View style={styles.tooltip}>
+                      <Text style={styles.tooltipText}>
+                        You have {friends.length}{" "}
+                        {friends.length === 1 ? "friend" : "friends"} on Slakr
+                      </Text>
+                    </View>
+                  )}
+                </TouchableOpacity>
+              </View>
+            )}
             {friends.length === 0 ? (
               <View style={styles.emptyState}>
                 <Users color="#6B7280" size={48} />
@@ -558,11 +591,6 @@ export default function FriendsPage() {
             >
               Friends
             </Text>
-            {friends.length > 0 && (
-              <View style={styles.badge}>
-                <Text style={styles.badgeText}>{friends.length}</Text>
-              </View>
-            )}
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -636,6 +664,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     paddingHorizontal: 16,
     marginBottom: 16,
+    gap: 8,
   },
   tab: {
     flex: 1,
@@ -644,7 +673,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingVertical: 12,
     paddingHorizontal: 16,
-    marginHorizontal: 4,
     borderRadius: 8,
     backgroundColor: "rgba(255, 255, 255, 0.05)",
   },
@@ -846,5 +874,46 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textAlign: "center",
     paddingHorizontal: 32,
+  },
+  friendsCounter: {
+    backgroundColor: "rgba(59, 130, 246, 0.15)",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 8,
+    marginBottom: 16,
+    alignSelf: "flex-start",
+    position: "relative",
+    borderWidth: 1,
+    borderColor: "rgba(59, 130, 246, 0.3)",
+  },
+  friendsCounterText: {
+    color: "#3B82F6",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  tooltip: {
+    position: "absolute",
+    top: "100%",
+    left: 0,
+    marginTop: 8,
+    backgroundColor: "rgba(59, 130, 246, 0.1)",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: "rgba(59, 130, 246, 0.2)",
+    shadowColor: "#3B82F6",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+    width: "auto",
+    minWidth: 200,
+  },
+  tooltipText: {
+    color: "#3B82F6",
+    fontSize: 12,
+    fontWeight: "500",
+    textAlign: "center",
   },
 });
