@@ -17,16 +17,13 @@ export function AuthGuard({ children }: AuthGuardProps) {
     if (loading) return; // Wait for auth state to be determined
 
     const inAuthGroup = segments[0] === "(auth)";
-    const inMainGroup = segments[0] === "(main)";
     const inTabsGroup = segments[0] === "(tabs)";
 
     if (!user) {
       // User is not authenticated
-      if (inMainGroup) {
-        // Redirect from protected routes to auth homepage
-        router.replace("/(tabs)");
-      } else if (inTabsGroup) {
-        // User is already on auth homepage, stay there
+      if (!inAuthGroup) {
+        // Redirect any unauthenticated route to the auth screens
+        router.replace("/(auth)" as any);
       }
       // If already in auth group, stay there
     } else {
