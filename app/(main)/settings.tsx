@@ -359,10 +359,10 @@ export default function SettingsPage() {
             <Text style={styles.settingValue}>Coming Soon</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.settingRow}>
+          {/* <TouchableOpacity style={styles.settingRow}>
             <Text style={styles.settingLabel}>Theme</Text>
             <Text style={styles.settingValue}>Dark</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
 
           <TouchableOpacity style={styles.settingRow}>
             <Text style={styles.settingLabel}>Privacy</Text>

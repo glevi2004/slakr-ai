@@ -56,7 +56,6 @@ function TabBarComponent({ children }: TabBarProps) {
     </Tabs>
   );
 }
-
 // Attach Screen component to TabBar
 export const TabBar = Object.assign(TabBarComponent, {
   Screen: Tabs.Screen,
