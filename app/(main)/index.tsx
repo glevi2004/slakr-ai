@@ -1,5 +1,11 @@
 import React from "react";
-import { View, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
+import {
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  Alert,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { AppBackground } from "@/components/AppBackground";
 import { Image } from "expo-image";
@@ -9,11 +15,22 @@ import StreakCard from "@/components/StreakCard";
 import FriendsCard from "@/components/FriendsCard";
 
 export default function MainHomePage() {
+  const handleNotificationsPress = () => {
+    Alert.alert(
+      "Coming Soon!",
+      "Notifications feature will be available in a future update.",
+      [{ text: "OK", style: "default" }]
+    );
+  };
+
   return (
     <SafeAreaView style={styles.safeArea} edges={["top", "left", "right"]}>
       <AppBackground>
         {/* Top Right Notification Button - positioned relative to SafeAreaView */}
-        <TouchableOpacity style={styles.topNotificationButton}>
+        <TouchableOpacity
+          style={styles.topNotificationButton}
+          onPress={handleNotificationsPress}
+        >
           <Bell size={24} color="#FFFFFF" />
         </TouchableOpacity>
 
