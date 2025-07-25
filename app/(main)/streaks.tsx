@@ -21,6 +21,7 @@ import { StreakService } from "@/services/streakService";
 import Hero from "@/components/streaks/Hero";
 import StatsChip from "@/components/streaks/StatsChip";
 import CalendarGrid from "@/components/streaks/CalendarGrid";
+import { DailyStatsService } from "@/services/dailyStatsService";
 
 const months = [
   "January",
@@ -48,10 +49,11 @@ export default function StreaksPage() {
   const [studyData, setStudyData] = useState<{ [key: string]: number }>({});
   const [streakStatsLoading, setStreakStatsLoading] = useState(true);
   const [monthDataLoading, setMonthDataLoading] = useState(false);
+  const [firstStudyDate, setFirstStudyDate] = useState<string | null>(null);
 
-  // Load streak stats once (global user data)
+  // Load streak stats and first study date
   useEffect(() => {
-    const loadStreakStats = async () => {
+    const loadData = async () => {
       if (!user?.id) {
         setStreakStatsLoading(false);
         return;
@@ -60,11 +62,28 @@ export default function StreaksPage() {
       try {
         setStreakStatsLoading(true);
 
+        // Get all daily stats to find first study date
+        const startDate = "2000-01-01"; // Far past date
+        const endDate = dayjs().format("YYYY-MM-DD");
+        const allStudyData = await DailyStatsService.getDailyStats(
+          user.id,
+          startDate,
+          endDate
+        );
+
+        // Find first date with study time
+        const studyDates = Object.entries(allStudyData)
+          .filter(([_, minutes]) => minutes > 0)
+          .map(([date]) => date)
+          .sort();
+
+        setFirstStudyDate(studyDates[0] || null);
+
         const userStreaks = await StreakService.getUserStreaks(user.id);
 
         if (userStreaks) {
           setStreakStats({
-            totalMinutes: Math.round(userStreaks.total_study_time_seconds / 60),
+            totalMinutes: Math.ceil(userStreaks.total_study_time_seconds / 60),
             currentStreak: userStreaks.current_streak,
             longestStreak: userStreaks.longest_streak,
           });
@@ -76,8 +95,8 @@ export default function StreaksPage() {
       }
     };
 
-    loadStreakStats();
-  }, [user?.id]); // Only reload when user changes
+    loadData();
+  }, [user?.id]);
 
   // Load monthly calendar data when month changes
   useEffect(() => {
@@ -157,15 +176,18 @@ export default function StreaksPage() {
 
   // Calculate average minutes per day from study data
   const avgMinutesPerDay = useMemo(() => {
-    const studyDays = Object.keys(studyData).length;
-    if (studyDays === 0) return 0;
+    if (!firstStudyDate) return 0;
 
     const totalMinutes = Object.values(studyData).reduce(
       (sum, minutes) => sum + minutes,
       0
     );
-    return Math.round(totalMinutes / 30); // Average over 30 days
-  }, [studyData]);
+
+    // Calculate days since first study
+    const daysSinceStart = dayjs().diff(dayjs(firstStudyDate), "day") + 1;
+
+    return Math.round(totalMinutes / daysSinceStart);
+  }, [studyData, firstStudyDate]);
 
   return (
     <AppBackground>

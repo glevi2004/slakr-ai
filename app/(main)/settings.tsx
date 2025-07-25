@@ -213,7 +213,7 @@ export default function SettingsPage() {
         <View style={styles.header}>
           <TouchableOpacity
             style={styles.backButton}
-            onPress={() => router.back()}
+            onPress={() => router.push("/(main)/profile")}
           >
             <ArrowLeft color="#FFFFFF" size={24} />
           </TouchableOpacity>

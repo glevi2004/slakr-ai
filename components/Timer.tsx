@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import {
   Pause,
@@ -13,12 +13,15 @@ import {
 } from "lucide-react-native";
 import { useAuth } from "../contexts/AuthContext";
 import { useTimer } from "../hooks/useTimer";
+import { MIN_SESH_TIME } from "../constants/Timer";
+import { StreakService } from "../services/streakService";
 
 type TimerMode = "session" | "pomodoro" | "focus";
 
 export default function Timer() {
   // Auth context
   const { user } = useAuth();
+  const userId = user?.id;
 
   // Timer hook for Study Session mode
   const {
@@ -197,13 +200,47 @@ export default function Timer() {
     }
   };
 
+  const confirmStopTimer = (seconds: number): Promise<boolean> => {
+    return new Promise((resolve) => {
+      if (seconds < MIN_SESH_TIME) {
+        Alert.alert(
+          "End Session Early?",
+          "This session is less than 5 minutes and won't count towards your streaks. Are you sure you want to end it?",
+          [
+            {
+              text: "Cancel",
+              style: "cancel",
+              onPress: () => resolve(false),
+            },
+            {
+              text: "End Session",
+              style: "destructive",
+              onPress: () => resolve(true),
+            },
+          ]
+        );
+      } else {
+        resolve(true);
+      }
+    });
+  };
+
   const handleStop = async () => {
+    const currentSeconds = getCurrentSeconds();
+    const shouldStop = await confirmStopTimer(currentSeconds);
+
+    if (!shouldStop) return;
+
     if (timerMode === "session") {
       await stopSession();
     } else {
       setIsActive(false);
       setSeconds(0);
-      // TODO: Implement pomodoro and focus timer logic
+
+      // Only update streaks if session meets minimum time
+      if (currentSeconds >= MIN_SESH_TIME && userId) {
+        await StreakService.updateUserStreaks(userId, currentSeconds);
+      }
     }
   };
 

@@ -3,38 +3,35 @@ import { View, Text, StyleSheet } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useAuth } from "../contexts/AuthContext";
 import { StreakService, UserStreak } from "../services/streakService";
+import { useTimer } from "../hooks/useTimer";
 
 export default function StreakCard() {
   const { user } = useAuth();
-  const [streakData, setStreakData] = useState<UserStreak | null>(null);
+  const { userStreaks, refreshStreaks } = useTimer(user?.id);
   const [todaysStudyTime, setTodaysStudyTime] = useState(0);
 
   useEffect(() => {
     if (!user?.id) return;
 
-    const loadStreakData = async () => {
+    const loadStudyTime = async () => {
       try {
-        const [streaks, todayTime] = await Promise.all([
-          StreakService.getUserStreaks(user.id),
-          StreakService.getTodaysStudyTime(user.id),
-        ]);
-
-        setStreakData(streaks);
+        const todayTime = await StreakService.getTodaysStudyTime(user.id);
         setTodaysStudyTime(todayTime);
       } catch (error) {
-        console.error("Error loading streak data:", error);
+        console.error("Error loading study time:", error);
       }
     };
 
-    loadStreakData();
+    loadStudyTime();
+    refreshStreaks();
 
-    // Refresh every 30 seconds when user is viewing the page
-    const interval = setInterval(loadStreakData, 30000);
+    // Refresh study time every 30 seconds when user is viewing the page
+    const interval = setInterval(loadStudyTime, 30000);
     return () => clearInterval(interval);
-  }, [user?.id]);
+  }, [user?.id, refreshStreaks]);
 
   const formatTotalTime = (seconds: number) => {
-    const totalMinutes = Math.floor(seconds / 60);
+    const totalMinutes = Math.ceil(seconds / 60);
 
     if (totalMinutes < 60) {
       return `${totalMinutes}m`;
@@ -50,14 +47,14 @@ export default function StreakCard() {
   };
 
   const getCurrentStreakDisplay = () => {
-    if (!streakData) return "0 day streak";
+    if (!userStreaks) return "0 day streak";
 
-    if (streakData.current_streak === 0) {
+    if (userStreaks.current_streak === 0) {
       return "Start your streak!";
-    } else if (streakData.current_streak === 1) {
+    } else if (userStreaks.current_streak === 1) {
       return "1 day streak";
     } else {
-      return `${streakData.current_streak} day streak`;
+      return `${userStreaks.current_streak} day streak`;
     }
   };
 
@@ -97,11 +94,11 @@ export default function StreakCard() {
 
         <View style={styles.streakStats}>
           <Text style={styles.totalTimeText}>
-            Total: {formatTotalTime(streakData?.total_study_time_seconds || 0)}
+            Total: {formatTotalTime(userStreaks?.total_study_time_seconds || 0)}
           </Text>
-          {streakData && streakData.longest_streak > 0 && (
+          {userStreaks && userStreaks.longest_streak > 0 && (
             <Text style={styles.longestStreakText}>
-              Best: {streakData.longest_streak} days
+              Best: {userStreaks.longest_streak} days
             </Text>
           )}
         </View>

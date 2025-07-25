@@ -20,18 +20,15 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import { AppBackground } from "@/components/AppBackground";
 import { useAuth } from "@/contexts/AuthContext";
 import { ProfileService, UserProfile } from "@/services/profileService";
-import { StreakService } from "@/services/streakService";
+import { StreakService, UserStreak } from "@/services/streakService";
+import { getUserLevel } from "@/constants/Levels";
 
 export default function FriendProfilePage() {
   const { id } = useLocalSearchParams();
   const { user } = useAuth();
   const router = useRouter();
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [streakStats, setStreakStats] = useState({
-    currentStreak: 0,
-    longestStreak: 0,
-    totalStudyTime: 0,
-  });
+  const [streakData, setStreakData] = useState<UserStreak | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -53,15 +50,8 @@ export default function FriendProfilePage() {
         if (friendProfile) {
           setProfile(friendProfile);
         }
-
         if (friendStreaks) {
-          setStreakStats({
-            currentStreak: friendStreaks.current_streak,
-            longestStreak: friendStreaks.longest_streak,
-            totalStudyTime: Math.round(
-              friendStreaks.total_study_time_seconds / 60
-            ),
-          });
+          setStreakData(friendStreaks);
         }
       } catch (error) {
         console.error("Error loading friend profile data:", error);
@@ -72,6 +62,10 @@ export default function FriendProfilePage() {
 
     loadData();
   }, [id, user?.id]);
+
+  const userLevel = getUserLevel(
+    Math.ceil((streakData?.total_study_time_seconds || 0) / 60)
+  );
 
   const formatTime = (minutes: number): string => {
     if (minutes < 60) {
@@ -171,21 +165,72 @@ export default function FriendProfilePage() {
               {renderStatCard(
                 <Target color="#3B82F6" size={24} />,
                 "Current Streak",
-                streakStats.currentStreak,
+                streakData?.current_streak || 0,
                 " days"
               )}
               {renderStatCard(
                 <Award color="#F59E0B" size={24} />,
                 "Best Streak",
-                streakStats.longestStreak,
+                streakData?.longest_streak || 0,
                 " days"
               )}
               {renderStatCard(
                 <Clock color="#10B981" size={24} />,
                 "Total Time",
-                formatTime(streakStats.totalStudyTime)
+                formatTime(
+                  Math.round((streakData?.total_study_time_seconds || 0) / 60)
+                )
               )}
             </View>
+          </View>
+
+          {/* Level Card */}
+          <View style={styles.levelCard}>
+            <Text style={styles.sectionTitle}>Study Level</Text>
+
+            {profile && (
+              <View style={styles.levelContainer}>
+                {/* Level Icon and Title */}
+                <View style={styles.levelHeader}>
+                  <View
+                    style={[
+                      styles.levelIconContainer,
+                      { backgroundColor: `${userLevel.currentLevel.color}20` },
+                    ]}
+                  >
+                    <userLevel.currentLevel.icon
+                      size={32}
+                      color={userLevel.currentLevel.color}
+                    />
+                  </View>
+                  <View style={styles.levelTitleContainer}>
+                    <Text style={styles.levelTitle}>
+                      {userLevel.currentLevel.title}
+                    </Text>
+                    {userLevel.minutesToNextLevel && (
+                      <Text style={styles.levelProgress}>
+                        {userLevel.minutesToNextLevel}m until next level
+                      </Text>
+                    )}
+                  </View>
+                </View>
+
+                {/* Progress Bar */}
+                <View style={styles.progressBarContainer}>
+                  <View style={styles.progressBarBackground}>
+                    <View
+                      style={[
+                        styles.progressBarFill,
+                        {
+                          width: `${userLevel.progress * 100}%`,
+                          backgroundColor: userLevel.currentLevel.color,
+                        },
+                      ]}
+                    />
+                  </View>
+                </View>
+              </View>
+            )}
           </View>
 
           {/* Academic Information */}
@@ -208,25 +253,6 @@ export default function FriendProfilePage() {
               <Text style={styles.infoValue}>
                 {profile?.major || "Not set"}
               </Text>
-            </View>
-          </View>
-
-          {/* Achievements Section */}
-          <View style={styles.achievementsCard}>
-            <Text style={styles.sectionTitle}>Achievements</Text>
-            <View style={styles.badgesContainer}>
-              <View style={styles.badgePlaceholder}>
-                <Award color="#F59E0B" size={24} />
-                <Text style={styles.badgeText}>First Study</Text>
-              </View>
-              <View style={styles.badgePlaceholder}>
-                <TrendingUp color="#10B981" size={24} />
-                <Text style={styles.badgeText}>Week Warrior</Text>
-              </View>
-              <View style={styles.badgePlaceholder}>
-                <Target color="#8B5CF6" size={24} />
-                <Text style={styles.badgeText}>Goal Crusher</Text>
-              </View>
             </View>
           </View>
 
@@ -434,5 +460,56 @@ const styles = StyleSheet.create({
   },
   bottomSpacer: {
     height: 100,
+  },
+  levelCard: {
+    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    borderRadius: 16,
+    marginHorizontal: 16,
+    marginBottom: 20,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.1)",
+  },
+  levelContainer: {
+    marginTop: 12,
+  },
+  levelHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  levelIconContainer: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 16,
+  },
+  levelTitleContainer: {
+    flex: 1,
+  },
+  levelTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#FFFFFF",
+    marginBottom: 4,
+  },
+  levelProgress: {
+    fontSize: 14,
+    color: "#9CA3AF",
+  },
+  progressBarContainer: {
+    marginTop: 8,
+  },
+  progressBarBackground: {
+    height: 8,
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    borderRadius: 4,
+    overflow: "hidden",
+  },
+  progressBarFill: {
+    height: "100%",
+    borderRadius: 4,
   },
 });

@@ -1,5 +1,6 @@
 import { supabase } from "../lib/supabase";
 import { router } from "expo-router";
+import { MIN_SESH_TIME } from "../constants/Timer";
 
 export interface UserStreak {
   user_id: string;
@@ -108,6 +109,12 @@ export class StreakService {
     sessionDuration: number
   ): Promise<UserStreak | null> {
     try {
+      // Only update streaks if session meets minimum time
+      if (sessionDuration < MIN_SESH_TIME) {
+        console.log("⏰ Session too short for streak update:", sessionDuration);
+        return null;
+      }
+
       console.log(
         "🔥 Starting streak update for user:",
         userId,
@@ -124,7 +131,7 @@ export class StreakService {
 
       console.log("📊 Current streak data:", currentStreaks);
 
-      const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD format
+      const today = new Date().toISOString().split("T")[0];
       const lastSessionDate = currentStreaks.last_session_date;
 
       console.log("📅 Today:", today, "Last session:", lastSessionDate);
@@ -132,7 +139,7 @@ export class StreakService {
       // Calculate new streak values
       const streakUpdate = this.calculateStreakUpdate(
         lastSessionDate,
-        sessionDuration,
+        today,
         currentStreaks.current_streak,
         currentStreaks.longest_streak
       );
@@ -168,19 +175,17 @@ export class StreakService {
   }
 
   /**
-   * Calculate streak updates based on session
+   * Calculate streak updates based on session dates
    */
   static calculateStreakUpdate(
     lastSessionDate: string | null,
-    sessionDuration: number,
+    today: string,
     currentStreak: number,
     longestStreak: number
   ): {
     currentStreak: number;
     longestStreak: number;
-    achievedDailyGoal: boolean;
   } {
-    const today = new Date().toISOString().split("T")[0];
     console.log(
       "🧮 Calculating streak - Today:",
       today,
@@ -190,7 +195,6 @@ export class StreakService {
       currentStreak
     );
 
-    // No daily goal requirement - any session counts for streak
     let newCurrentStreak = currentStreak;
 
     if (!lastSessionDate) {
@@ -207,14 +211,9 @@ export class StreakService {
       console.log("📆 Days difference:", daysDifference);
 
       if (daysDifference === 0) {
-        // Same day - if current streak is 0, this is first session of the day
-        if (currentStreak === 0) {
-          console.log("🎯 First session of the day - starting streak!");
-          newCurrentStreak = 1;
-        } else {
-          console.log("📅 Same day - streak continues");
-          newCurrentStreak = currentStreak;
-        }
+        // Same day - maintain current streak
+        console.log("📅 Same day - streak continues");
+        newCurrentStreak = currentStreak;
       } else if (daysDifference === 1) {
         // Next day, streak continues
         console.log("➡️ Next day - streak increases!");
@@ -237,39 +236,7 @@ export class StreakService {
     return {
       currentStreak: newCurrentStreak,
       longestStreak: newLongestStreak,
-      achievedDailyGoal: true, // Every session counts
     };
-  }
-
-  /**
-   * Check if user has achieved daily goal today
-   */
-  static async hasAchievedDailyGoal(userId: string): Promise<boolean> {
-    try {
-      const today = new Date().toISOString().split("T")[0];
-
-      const { data, error } = await supabase
-        .from("study_sessions")
-        .select("duration_seconds")
-        .eq("user_id", userId)
-        .eq("status", "completed")
-        .gte("started_at", `${today}T00:00:00.000Z`)
-        .lt("started_at", `${today}T23:59:59.999Z`);
-
-      if (error) {
-        console.error("Error checking daily goal:", error);
-        return false;
-      }
-
-      const totalDuration = data.reduce(
-        (sum, session) => sum + session.duration_seconds,
-        0
-      );
-      return totalDuration >= 30 * 60; // 30 minutes
-    } catch (error) {
-      console.error("Error checking daily goal:", error);
-      return false;
-    }
   }
 
   /**

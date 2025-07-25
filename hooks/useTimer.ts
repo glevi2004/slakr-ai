@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react";
-import { AppState, AppStateStatus } from "react-native";
+import { AppState, AppStateStatus, Alert } from "react-native";
 import { SessionService, StudySession } from "../services/sessionService";
 import { StreakService, UserStreak } from "../services/streakService";
+import { MIN_SESH_TIME } from "../constants/Timer";
 
 export interface UseTimerReturn {
   seconds: number;
@@ -171,22 +172,51 @@ export function useTimer(userId: string | undefined): UseTimerReturn {
     }
   };
 
+  const confirmStopSession = (seconds: number): Promise<boolean> => {
+    return new Promise((resolve) => {
+      if (seconds < MIN_SESH_TIME) {
+        Alert.alert(
+          "End Session Early?",
+          "This session is less than 5 minutes and won't count towards your streaks. Are you sure you want to end it?",
+          [
+            {
+              text: "Cancel",
+              style: "cancel",
+              onPress: () => resolve(false),
+            },
+            {
+              text: "End Session",
+              style: "destructive",
+              onPress: () => resolve(true),
+            },
+          ]
+        );
+      } else {
+        resolve(true);
+      }
+    });
+  };
+
   const stopTimer = async () => {
     if (!currentSession || !userId) return;
 
     try {
+      const shouldStop = await confirmStopSession(seconds);
+      if (!shouldStop) return;
+
       console.log("⏹️ Stopping timer - Session duration:", seconds, "seconds");
 
-      // Complete the session
+      // Complete the session only if it meets minimum time
       const success = await SessionService.completeSession(
         currentSession.id,
         seconds
       );
+
       if (success) {
         console.log("✅ Session completed successfully");
 
-        // Update streaks if session is long enough (30 seconds minimum)
-        if (seconds >= 30) {
+        // Update streaks only if session meets minimum time
+        if (seconds >= MIN_SESH_TIME) {
           console.log("🚀 Updating streaks for session duration:", seconds);
           const updatedStreaks = await StreakService.updateUserStreaks(
             userId,
