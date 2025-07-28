@@ -25,18 +25,8 @@ import { useRouter } from "expo-router";
 import { AppBackground } from "@/components/AppBackground";
 import { useAuth } from "@/contexts/AuthContext";
 import { ProfileService, UserProfile } from "@/services/profileService";
-import SearchableDropdown from "@/components/ui/SearchableDropdown";
 import UniversityDropdown from "@/components/UniversityDropdown";
-
-const GRADE_OPTIONS = [
-  "Freshman",
-  "Sophomore",
-  "Junior",
-  "Senior",
-  "Graduate Student",
-  "PhD Student",
-  "Other",
-];
+import GradeDropdown from "@/components/GradeDropdown";
 
 export default function SettingsPage() {
   const { user, signOut } = useAuth();
@@ -209,14 +199,13 @@ export default function SettingsPage() {
       </View>
       {isEditing ? (
         isGradeField ? (
-          <View style={styles.dropdownContainer}>
-            <SearchableDropdown
-              options={GRADE_OPTIONS}
-              value={editForm[field]}
-              onSelect={(value) => setEditForm({ ...editForm, [field]: value })}
-              placeholder={placeholder}
-            />
-          </View>
+          <GradeDropdown
+            value={editForm[field]}
+            onSelect={(value: string) =>
+              setEditForm({ ...editForm, [field]: value })
+            }
+            placeholder={placeholder}
+          />
         ) : isUniversityField ? (
           <UniversityDropdown
             value={editForm[field]}
@@ -607,9 +596,6 @@ const styles = StyleSheet.create({
   },
   bottomSpacer: {
     height: 100,
-  },
-  dropdownContainer: {
-    marginLeft: 28,
   },
   universityFieldContainer: {
     // No margin needed - parent container already handles positioning
