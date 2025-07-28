@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { useRouter, useSegments } from "expo-router";
 import { useAuth } from "@/contexts/AuthContext";
+import LoadingIndicator from "./LoadingIndicator";
 import { AppBackground } from "@/components/AppBackground";
 
 interface AuthGuardProps {
@@ -40,9 +41,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
   if (loading) {
     return (
       <AppBackground>
-        <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Loading...</Text>
-        </View>
+        <LoadingIndicator text="Loading..." />
       </AppBackground>
     );
   }
@@ -50,15 +49,4 @@ export function AuthGuard({ children }: AuthGuardProps) {
   return <>{children}</>;
 }
 
-const styles = StyleSheet.create({
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  loadingText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "500",
-  },
-});
+const styles = StyleSheet.create({});

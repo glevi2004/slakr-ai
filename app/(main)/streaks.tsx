@@ -18,6 +18,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { AppBackground } from "@/components/AppBackground";
 import { useAuth } from "@/contexts/AuthContext";
 import { StreakService } from "@/services/streakService";
+import LoadingIndicator from "@/components/LoadingIndicator";
 import Hero from "@/components/streaks/Hero";
 import StatsChip from "@/components/streaks/StatsChip";
 import CalendarGrid from "@/components/streaks/CalendarGrid";
@@ -189,6 +190,14 @@ export default function StreaksPage() {
     return Math.round(totalMinutes / daysSinceStart);
   }, [studyData, firstStudyDate]);
 
+  if (streakStatsLoading) {
+    return (
+      <AppBackground>
+        <LoadingIndicator text="Loading streaks..." />
+      </AppBackground>
+    );
+  }
+
   return (
     <AppBackground>
       <ScrollView
@@ -199,64 +208,50 @@ export default function StreaksPage() {
           <Text style={[styles.headerTitle, { color: "#FFFFFF" }]}>Streak</Text>
         </View>
 
-        {streakStatsLoading ? (
-          <View style={styles.loadingContainer}>
-            <Text style={styles.loadingText}>Loading streaks...</Text>
-          </View>
-        ) : (
-          <>
-            {/* Hero Section */}
-            <Hero currentStreak={streakStats.currentStreak} />
+        {/* Hero Section */}
+        <Hero currentStreak={streakStats.currentStreak} />
 
-            {/* Stats Strip */}
-            <View style={styles.statsContainer}>
-              <StatsChip
-                icon={Clock}
-                iconColor="#3B82F6"
-                label="Total Minutes"
-                value={streakStats.totalMinutes}
-                suffix="m"
-              />
-              <StatsChip
-                icon={TrendingUp}
-                iconColor="#10B981"
-                label="Avg/Day"
-                value={avgMinutesPerDay}
-                suffix="m"
-              />
-              <StatsChip
-                icon={Award}
-                iconColor="#F59E0B"
-                label="Best Streak"
-                value={streakStats.longestStreak}
-              />
-            </View>
+        {/* Stats Strip */}
+        <View style={styles.statsContainer}>
+          <StatsChip
+            icon={Clock}
+            iconColor="#3B82F6"
+            label="Total Minutes"
+            value={streakStats.totalMinutes}
+            suffix="m"
+          />
+          <StatsChip
+            icon={TrendingUp}
+            iconColor="#10B981"
+            label="Avg/Day"
+            value={avgMinutesPerDay}
+            suffix="m"
+          />
+          <StatsChip
+            icon={Award}
+            iconColor="#F59E0B"
+            label="Best Streak"
+            value={streakStats.longestStreak}
+          />
+        </View>
 
-            {/* Month Selector */}
-            <View style={styles.monthSelector}>
-              <TouchableOpacity
-                onPress={handlePrevMonth}
-                style={styles.monthArrow}
-              >
-                <ArrowLeft color="#FFFFFF" size={24} />
-              </TouchableOpacity>
+        {/* Month Selector */}
+        <View style={styles.monthSelector}>
+          <TouchableOpacity onPress={handlePrevMonth} style={styles.monthArrow}>
+            <ArrowLeft color="#FFFFFF" size={24} />
+          </TouchableOpacity>
 
-              <Text style={[styles.monthText, { color: "#FFFFFF" }]}>
-                {months[currentMonth.month()]} {currentMonth.year()}
-              </Text>
+          <Text style={[styles.monthText, { color: "#FFFFFF" }]}>
+            {months[currentMonth.month()]} {currentMonth.year()}
+          </Text>
 
-              <TouchableOpacity
-                onPress={handleNextMonth}
-                style={styles.monthArrow}
-              >
-                <ArrowRight color="#FFFFFF" size={24} />
-              </TouchableOpacity>
-            </View>
+          <TouchableOpacity onPress={handleNextMonth} style={styles.monthArrow}>
+            <ArrowRight color="#FFFFFF" size={24} />
+          </TouchableOpacity>
+        </View>
 
-            {/* Calendar Grid */}
-            <CalendarGrid currentMonth={currentMonth} studyData={studyData} />
-          </>
-        )}
+        {/* Calendar Grid */}
+        <CalendarGrid currentMonth={currentMonth} studyData={studyData} />
 
         <View style={styles.bottomSpacer} />
       </ScrollView>
@@ -267,17 +262,6 @@ export default function StreaksPage() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingVertical: 40,
-  },
-  loadingText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "500",
   },
   header: {
     flexDirection: "row",

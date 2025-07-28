@@ -8,6 +8,7 @@ import {
   TextInput,
   Alert,
   Image,
+  ActivityIndicator,
 } from "react-native";
 import {
   ArrowLeft,
@@ -25,9 +26,13 @@ import { useRouter } from "expo-router";
 import { AppBackground } from "@/components/AppBackground";
 import { useAuth } from "@/contexts/AuthContext";
 import { ProfileService, UserProfile } from "@/services/profileService";
+import { StorageService } from "@/services/storageService";
+import { supabase } from "@/lib/supabase";
 import UniversityDropdown from "@/components/UniversityDropdown";
 import GradeDropdown from "@/components/GradeDropdown";
 import MajorDropdown from "@/components/MajorDropdown";
+import LoadingIndicator from "@/components/LoadingIndicator";
+import * as ImagePicker from "expo-image-picker";
 
 export default function SettingsPage() {
   const { user, signOut } = useAuth();
@@ -35,6 +40,7 @@ export default function SettingsPage() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
+  const [avatarUploading, setAvatarUploading] = useState(false);
   const [editForm, setEditForm] = useState({
     full_name: "",
     username: "",
@@ -145,6 +151,107 @@ export default function SettingsPage() {
     ]);
   };
 
+  const pickImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert(
+        "Permission Required",
+        "Sorry, we need camera roll permissions to upload a profile picture."
+      );
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
+
+    if (!result.canceled && result.assets[0]) {
+      await uploadAvatar(result.assets[0].uri);
+    }
+  };
+
+  const takePhoto = async () => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert(
+        "Permission Required",
+        "Sorry, we need camera permissions to take a profile picture."
+      );
+      return;
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
+
+    if (!result.canceled && result.assets[0]) {
+      await uploadAvatar(result.assets[0].uri);
+    }
+  };
+
+  const uploadAvatar = async (imageUri: string) => {
+    if (!user?.id) return;
+
+    try {
+      setAvatarUploading(true);
+      console.log("📤 Uploading new avatar...");
+
+      const { url, error } = await StorageService.uploadAvatar(
+        user.id,
+        imageUri
+      );
+
+      if (error) {
+        Alert.alert("Upload Failed", error);
+        return;
+      }
+
+      if (url) {
+        console.log("✅ Avatar uploaded, updating profile table...");
+
+        // Update the profiles table instead of auth metadata
+        const { error: updateError } = await supabase
+          .from("profiles")
+          .update({ avatar_url: url })
+          .eq("id", user.id);
+
+        if (updateError) {
+          console.error("Failed to update profile:", updateError);
+          Alert.alert("Update Failed", "Failed to update profile picture");
+          return;
+        }
+
+        console.log("✅ Profile updated successfully");
+
+        // Update local profile state
+        setProfile((prev) => (prev ? { ...prev, avatar_url: url } : null));
+        Alert.alert("Success", "Profile picture updated successfully!");
+      }
+    } catch (error) {
+      console.error("Avatar upload error:", error);
+      Alert.alert("Error", "Failed to upload profile picture");
+    } finally {
+      setAvatarUploading(false);
+    }
+  };
+
+  const showImagePicker = () => {
+    Alert.alert(
+      "Update Profile Picture",
+      "Choose how you want to update your profile picture",
+      [
+        { text: "Camera", onPress: takePhoto },
+        { text: "Photo Library", onPress: pickImage },
+        { text: "Cancel", style: "cancel" },
+      ]
+    );
+  };
+
   // Function to parse university field and extract name and location
   const parseUniversityField = (universityField: string) => {
     if (!universityField) return { name: "", location: "" };
@@ -246,9 +353,7 @@ export default function SettingsPage() {
   if (loading && !profile) {
     return (
       <AppBackground>
-        <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Loading settings...</Text>
-        </View>
+        <LoadingIndicator text="Loading settings..." />
       </AppBackground>
     );
   }
@@ -275,7 +380,11 @@ export default function SettingsPage() {
 
         {/* Profile Picture Section */}
         <View style={styles.profilePictureSection}>
-          <View style={styles.profilePictureContainer}>
+          <TouchableOpacity
+            style={styles.profilePictureContainer}
+            onPress={showImagePicker}
+            disabled={avatarUploading}
+          >
             {profile?.avatar_url ? (
               <Image
                 source={{ uri: profile.avatar_url }}
@@ -286,10 +395,19 @@ export default function SettingsPage() {
                 <User color="#FFFFFF" size={40} />
               </View>
             )}
-            <TouchableOpacity style={styles.cameraButton}>
+
+            {/* Upload indicator */}
+            {avatarUploading && (
+              <View style={styles.uploadingOverlay}>
+                <ActivityIndicator size="small" color="#FFFFFF" />
+              </View>
+            )}
+
+            {/* Edit icon */}
+            <View style={styles.cameraButton}>
               <Camera color="#FFFFFF" size={16} />
-            </TouchableOpacity>
-          </View>
+            </View>
+          </TouchableOpacity>
           <Text style={styles.emailText}>{user?.email}</Text>
         </View>
 
@@ -434,15 +552,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  loadingText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-  },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -491,6 +600,17 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  uploadingOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    borderRadius: 50,
     justifyContent: "center",
     alignItems: "center",
   },

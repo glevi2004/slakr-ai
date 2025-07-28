@@ -24,6 +24,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { AppBackground } from "@/components/AppBackground";
 import { useAuth } from "@/contexts/AuthContext";
 import { ProfileService, UserProfile } from "@/services/profileService";
+import LoadingIndicator from "@/components/LoadingIndicator";
 import { StreakService, UserStreak } from "@/services/streakService";
 import { getUserLevel } from "@/constants/Levels";
 
@@ -191,9 +192,7 @@ export default function ProfilePage() {
   if (loading) {
     return (
       <AppBackground>
-        <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Loading profile...</Text>
-        </View>
+        <LoadingIndicator text="Loading profile..." />
       </AppBackground>
     );
   }
@@ -357,15 +356,6 @@ export default function ProfilePage() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  loadingText: {
-    color: "#FFFFFF",
-    fontSize: 16,
   },
   header: {
     flexDirection: "row",

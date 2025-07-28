@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import { useAuth } from "@/contexts/AuthContext";
+import LoadingIndicator from "@/components/LoadingIndicator";
 import { AppBackground } from "@/components/AppBackground";
 
 export default function Index() {
@@ -24,9 +25,7 @@ export default function Index() {
   if (loading) {
     return (
       <AppBackground>
-        <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Loading...</Text>
-        </View>
+        <LoadingIndicator text="Loading..." />
       </AppBackground>
     );
   }
@@ -34,22 +33,9 @@ export default function Index() {
   // This should never be reached, but just in case
   return (
     <AppBackground>
-      <View style={styles.loadingContainer}>
-        <Text style={styles.loadingText}>Redirecting...</Text>
-      </View>
+      <LoadingIndicator text="Redirecting..." />
     </AppBackground>
   );
 }
 
-const styles = StyleSheet.create({
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  loadingText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "500",
-  },
-});
+const styles = StyleSheet.create({});
