@@ -26,6 +26,7 @@ import { AppBackground } from "@/components/AppBackground";
 import { useAuth } from "@/contexts/AuthContext";
 import { ProfileService, UserProfile } from "@/services/profileService";
 import SearchableDropdown from "@/components/ui/SearchableDropdown";
+import UniversityDropdown from "@/components/UniversityDropdown";
 
 const GRADE_OPTIONS = [
   "Freshman",
@@ -153,6 +154,44 @@ export default function SettingsPage() {
     ]);
   };
 
+  // Function to parse university field and extract name and location
+  const parseUniversityField = (universityField: string) => {
+    if (!universityField) return { name: "", location: "" };
+
+    const firstCommaIndex = universityField.indexOf(",");
+    if (firstCommaIndex === -1) {
+      // No comma found, return the whole string as name
+      return { name: universityField.trim(), location: "" };
+    }
+
+    const name = universityField.substring(0, firstCommaIndex).trim();
+    const location = universityField.substring(firstCommaIndex + 1).trim();
+
+    return { name, location };
+  };
+
+  // Component to render university field with location badge
+  const renderUniversityField = (value: string) => {
+    const { name, location } = parseUniversityField(value);
+
+    if (!name) {
+      return <Text style={styles.fieldValue}>No school set</Text>;
+    }
+
+    return (
+      <View style={styles.universityFieldContainer}>
+        <View style={styles.universityContent}>
+          <Text style={styles.fieldValue}>{name}</Text>
+          {location && (
+            <View style={styles.locationBadge}>
+              <Text style={styles.locationBadgeText}>{location}</Text>
+            </View>
+          )}
+        </View>
+      </View>
+    );
+  };
+
   const renderProfileField = (
     icon: React.ReactNode,
     label: string,
@@ -160,7 +199,8 @@ export default function SettingsPage() {
     placeholder: string,
     field: keyof typeof editForm,
     multiline: boolean = false,
-    isGradeField: boolean = false
+    isGradeField: boolean = false,
+    isUniversityField: boolean = false
   ) => (
     <View style={styles.fieldContainer}>
       <View style={styles.fieldHeader}>
@@ -177,6 +217,12 @@ export default function SettingsPage() {
               placeholder={placeholder}
             />
           </View>
+        ) : isUniversityField ? (
+          <UniversityDropdown
+            value={editForm[field]}
+            onSelect={(value) => setEditForm({ ...editForm, [field]: value })}
+            placeholder={placeholder}
+          />
         ) : (
           <TextInput
             style={[styles.textInput, multiline && styles.textInputMultiline]}
@@ -188,6 +234,8 @@ export default function SettingsPage() {
             numberOfLines={multiline ? 3 : 1}
           />
         )
+      ) : isUniversityField ? (
+        renderUniversityField(value)
       ) : (
         <Text style={styles.fieldValue}>
           {value || `No ${label.toLowerCase()} set`}
@@ -297,8 +345,11 @@ export default function SettingsPage() {
             <School color="#F59E0B" size={20} />,
             "School",
             profile?.school || "",
-            "Enter your school or university",
-            "school"
+            "Select your university",
+            "school",
+            false,
+            false,
+            true // isUniversityField
           )}
 
           {renderProfileField(
@@ -559,5 +610,28 @@ const styles = StyleSheet.create({
   },
   dropdownContainer: {
     marginLeft: 28,
+  },
+  universityFieldContainer: {
+    // No margin needed - parent container already handles positioning
+  },
+  universityContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginRight: 20,
+  },
+  locationBadge: {
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    borderRadius: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    marginLeft: 8,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.2)",
+  },
+  locationBadgeText: {
+    color: "rgba(255, 255, 255, 0.8)",
+    fontSize: 12,
+    fontWeight: "500",
   },
 });

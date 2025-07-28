@@ -15,6 +15,9 @@ import {
   Clock,
   Target,
   TrendingUp,
+  School,
+  GraduationCap,
+  BookOpen,
 } from "lucide-react-native";
 import { useRouter } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
@@ -104,6 +107,22 @@ export default function ProfilePage() {
       : `${hours}h`;
   };
 
+  // Function to parse university field and extract name and location
+  const parseUniversityField = (universityField: string) => {
+    if (!universityField) return { name: "", location: "" };
+
+    const firstCommaIndex = universityField.indexOf(",");
+    if (firstCommaIndex === -1) {
+      // No comma found, return the whole string as name
+      return { name: universityField.trim(), location: "" };
+    }
+
+    const name = universityField.substring(0, firstCommaIndex).trim();
+    const location = universityField.substring(firstCommaIndex + 1).trim();
+
+    return { name, location };
+  };
+
   const renderStatCard = (
     icon: React.ReactNode,
     label: string,
@@ -119,6 +138,48 @@ export default function ProfilePage() {
       <Text style={styles.statLabel}>{label}</Text>
     </View>
   );
+
+  // Function to render academic field with settings page styling
+  const renderAcademicField = (
+    icon: React.ReactNode,
+    label: string,
+    value: string | null,
+    isUniversityField: boolean = false
+  ) => {
+    const displayValue = value || `No ${label.toLowerCase()} set`;
+
+    return (
+      <View style={styles.academicFieldContainer}>
+        <View style={styles.academicFieldHeader}>
+          {icon}
+          <Text style={styles.academicFieldLabel}>{label}</Text>
+        </View>
+        {isUniversityField && value ? (
+          <View style={styles.universityFieldContainer}>
+            <View style={styles.universityContent}>
+              {(() => {
+                const { name, location } = parseUniversityField(value);
+                return (
+                  <>
+                    <Text style={styles.academicFieldValue}>
+                      {name || value}
+                    </Text>
+                    {location && (
+                      <View style={styles.locationBadge}>
+                        <Text style={styles.locationBadgeText}>{location}</Text>
+                      </View>
+                    )}
+                  </>
+                );
+              })()}
+            </View>
+          </View>
+        ) : (
+          <Text style={styles.academicFieldValue}>{displayValue}</Text>
+        )}
+      </View>
+    );
+  };
 
   const renderInfoRow = (label: string, value: string | null) => (
     <View style={styles.infoRow}>
@@ -266,9 +327,25 @@ export default function ProfilePage() {
         {/* Academic Information */}
         <View style={styles.infoCard}>
           <Text style={styles.sectionTitle}>Academic Information</Text>
-          {renderInfoRow("School", profile?.school ?? null)}
-          {renderInfoRow("Grade", profile?.grade ?? null)}
-          {renderInfoRow("Major", profile?.major ?? null)}
+
+          {renderAcademicField(
+            <School color="#F59E0B" size={20} />,
+            "School",
+            profile?.school ?? null,
+            true // isUniversityField
+          )}
+
+          {renderAcademicField(
+            <GraduationCap color="#8B5CF6" size={20} />,
+            "Grade",
+            profile?.grade ?? null
+          )}
+
+          {renderAcademicField(
+            <BookOpen color="#EF4444" size={20} />,
+            "Major",
+            profile?.major ?? null
+          )}
         </View>
 
         <View style={styles.bottomSpacer} />
@@ -509,5 +586,48 @@ const styles = StyleSheet.create({
   progressBarFill: {
     height: "100%",
     borderRadius: 4,
+  },
+  // Academic field styles (matching settings page)
+  academicFieldContainer: {
+    marginBottom: 20,
+  },
+  academicFieldHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  academicFieldLabel: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "600",
+    marginLeft: 8,
+  },
+  academicFieldValue: {
+    color: "rgba(255, 255, 255, 0.8)",
+    fontSize: 16,
+    paddingLeft: 28,
+  },
+  universityFieldContainer: {
+    // No margin needed - parent container already handles positioning
+  },
+  universityContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginRight: 20,
+  },
+  locationBadge: {
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    borderRadius: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    marginLeft: 8,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.2)",
+  },
+  locationBadgeText: {
+    color: "rgba(255, 255, 255, 0.8)",
+    fontSize: 12,
+    fontWeight: "500",
   },
 });
