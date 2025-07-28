@@ -27,6 +27,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { ProfileService, UserProfile } from "@/services/profileService";
 import UniversityDropdown from "@/components/UniversityDropdown";
 import GradeDropdown from "@/components/GradeDropdown";
+import MajorDropdown from "@/components/MajorDropdown";
 
 export default function SettingsPage() {
   const { user, signOut } = useAuth();
@@ -190,7 +191,8 @@ export default function SettingsPage() {
     field: keyof typeof editForm,
     multiline: boolean = false,
     isGradeField: boolean = false,
-    isUniversityField: boolean = false
+    isUniversityField: boolean = false,
+    isMajorField: boolean = false
   ) => (
     <View style={styles.fieldContainer}>
       <View style={styles.fieldHeader}>
@@ -200,6 +202,14 @@ export default function SettingsPage() {
       {isEditing ? (
         isGradeField ? (
           <GradeDropdown
+            value={editForm[field]}
+            onSelect={(value: string) =>
+              setEditForm({ ...editForm, [field]: value })
+            }
+            placeholder={placeholder}
+          />
+        ) : isMajorField ? (
+          <MajorDropdown
             value={editForm[field]}
             onSelect={(value: string) =>
               setEditForm({ ...editForm, [field]: value })
@@ -356,7 +366,11 @@ export default function SettingsPage() {
             "Major",
             profile?.major || "",
             "Enter your major or field of study",
-            "major"
+            "major",
+            false, // multiline
+            false, // isGradeField
+            false, // isUniversityField
+            true // isMajorField
           )}
 
           {renderProfileField(
