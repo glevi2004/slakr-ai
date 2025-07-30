@@ -75,6 +75,7 @@ export class StreakService {
    */
   static async createUserStreaks(userId: string): Promise<UserStreak | null> {
     try {
+      // Try to insert new streak record with ON CONFLICT DO NOTHING
       const { data, error } = await supabase
         .from("user_streaks")
         .insert({
@@ -88,11 +89,32 @@ export class StreakService {
         .single();
 
       if (error) {
-        console.error("Error creating user streaks:", error);
-        this.handleNetworkError(error);
-        return null;
+        // If it's a duplicate key error, fetch the existing record
+        if (error.code === "23505") {
+          console.log(
+            "⚠️ Streak record already exists, fetching existing record"
+          );
+          const { data: existingData, error: fetchError } = await supabase
+            .from("user_streaks")
+            .select("*")
+            .eq("user_id", userId)
+            .single();
+
+          if (fetchError) {
+            console.error("Error fetching existing streak record:", fetchError);
+            this.handleNetworkError(fetchError);
+            return null;
+          }
+
+          return existingData;
+        } else {
+          console.error("Error creating user streaks:", error);
+          this.handleNetworkError(error);
+          return null;
+        }
       }
 
+      console.log("✅ New streak record created successfully");
       return data;
     } catch (error) {
       console.error("Error creating user streaks:", error);

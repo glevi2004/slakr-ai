@@ -117,9 +117,20 @@ export default function RegisterScreen() {
     if (error) {
       Alert.alert("Registration Failed", error.message);
     } else {
-      // Since email verification is disabled, user is automatically logged in
-      // @ts-ignore - TypeScript strict typing issue with dynamic routes
-      router.replace("/(main)");
+      // Show success message for email verification
+      Alert.alert(
+        "Registration Successful! 📧",
+        "Please check your email and click the verification link to complete your account setup. The link will redirect you back to the app.",
+        [
+          {
+            text: "OK",
+            onPress: () => {
+              // Navigate back to login screen
+              router.replace("/(auth)/login");
+            },
+          },
+        ]
+      );
     }
     setLoading(false);
   };

@@ -3,6 +3,13 @@ import { Session, User, AuthError } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
 import { presenceService } from "@/services/presenceService";
 import { StorageService } from "@/services/storageService";
+import { makeRedirectUri } from "expo-auth-session";
+import * as QueryParams from "expo-auth-session/build/QueryParams";
+import * as WebBrowser from "expo-web-browser";
+import * as Linking from "expo-linking";
+
+// Required for web only
+WebBrowser.maybeCompleteAuthSession();
 
 interface AuthContextType {
   user: User | null;
@@ -23,6 +30,56 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+// Helper function to get the redirect URL
+const getRedirectURL = () => {
+  const redirectTo = makeRedirectUri();
+  console.log("🔗 Redirect URL generated:", redirectTo);
+  return redirectTo;
+};
+
+// Helper function to create session from URL
+const createSessionFromUrl = async (url: string) => {
+  console.log("🔗 Processing deep link URL:", url);
+
+  try {
+    const { params, errorCode } = QueryParams.getQueryParams(url);
+    console.log("📝 URL params:", params);
+    console.log("❌ Error code:", errorCode);
+
+    if (errorCode) {
+      console.error("❌ URL contained error:", errorCode);
+      throw new Error(errorCode);
+    }
+
+    const { access_token, refresh_token, type } = params;
+    console.log("🔑 Token type:", type);
+    console.log("🔑 Access token present:", !!access_token);
+    console.log("🔑 Refresh token present:", !!refresh_token);
+
+    if (!access_token) {
+      console.log("⚠️ No access token found in URL");
+      return;
+    }
+
+    console.log("🔄 Setting session with tokens...");
+    const { data, error } = await supabase.auth.setSession({
+      access_token,
+      refresh_token,
+    });
+
+    if (error) {
+      console.error("❌ Error setting session:", error);
+      throw error;
+    }
+
+    console.log("✅ Session created successfully from URL");
+    return data.session;
+  } catch (error) {
+    console.error("❌ Failed to create session from URL:", error);
+    throw error;
+  }
+};
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -60,8 +117,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     });
 
+    // Handle deep linking for email verification
+    const handleDeepLink = async (event: { url: string }) => {
+      console.log("🔗 Deep link received:", event.url);
+      try {
+        await createSessionFromUrl(event.url);
+        console.log("✅ Deep link processed successfully");
+      } catch (error) {
+        console.error("❌ Failed to process deep link:", error);
+      }
+    };
+
+    // Listen for deep links
+    const linkingSubscription = Linking.addEventListener("url", handleDeepLink);
+
+    // Check if app was opened from a deep link
+    Linking.getInitialURL().then((url) => {
+      if (url) {
+        console.log("🔗 App opened with initial URL:", url);
+        handleDeepLink({ url });
+      }
+    });
+
     return () => {
       subscription.unsubscribe();
+      linkingSubscription.remove();
       // Cleanup presence when component unmounts
       presenceService.cleanup();
     };
@@ -76,11 +156,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       console.log("🚀 Starting user registration...");
 
+      // Get redirect URL for email verification
+      const redirectTo = getRedirectURL();
+      console.log("📧 Email verification will redirect to:", redirectTo);
+
       // First, create the user account
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
         options: {
+          emailRedirectTo: redirectTo,
           data: {
             full_name: fullName,
             avatar_url: null, // Will be updated after upload
@@ -99,6 +184,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       console.log("✅ User account created:", authData.user.id);
+
+      // Check if email confirmation is required
+      if (!authData.session) {
+        console.log(
+          "📧 Email verification required. Check your email for confirmation link."
+        );
+        console.log("🔗 Verification link will redirect to:", redirectTo);
+        return { error: null }; // Success, but user needs to verify email
+      }
 
       // If avatar provided, upload it to storage
       let finalAvatarUrl = null;
