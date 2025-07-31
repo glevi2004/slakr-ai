@@ -88,32 +88,6 @@ export class StreakService {
         .select()
         .single();
 
-      if (error) {
-        // If it's a duplicate key error, fetch the existing record
-        if (error.code === "23505") {
-          console.log(
-            "⚠️ Streak record already exists, fetching existing record"
-          );
-          const { data: existingData, error: fetchError } = await supabase
-            .from("user_streaks")
-            .select("*")
-            .eq("user_id", userId)
-            .single();
-
-          if (fetchError) {
-            console.error("Error fetching existing streak record:", fetchError);
-            this.handleNetworkError(fetchError);
-            return null;
-          }
-
-          return existingData;
-        } else {
-          console.error("Error creating user streaks:", error);
-          this.handleNetworkError(error);
-          return null;
-        }
-      }
-
       console.log("✅ New streak record created successfully");
       return data;
     } catch (error) {

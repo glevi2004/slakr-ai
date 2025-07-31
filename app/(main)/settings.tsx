@@ -21,6 +21,7 @@ import {
   Camera,
   Save,
   X,
+  Key,
 } from "lucide-react-native";
 import { useRouter } from "expo-router";
 import { AppBackground } from "@/components/AppBackground";
@@ -35,7 +36,7 @@ import LoadingIndicator from "@/components/LoadingIndicator";
 import * as ImagePicker from "expo-image-picker";
 
 export default function SettingsPage() {
-  const { user, signOut } = useAuth();
+  const { user, signOut, resetPassword } = useAuth();
   const router = useRouter();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -350,6 +351,43 @@ export default function SettingsPage() {
     </View>
   );
 
+  const handleResetPassword = async () => {
+    if (!user?.email) {
+      Alert.alert("Error", "No email found for your account");
+      return;
+    }
+
+    Alert.alert(
+      "Reset Password",
+      `A password reset link will be sent to ${user.email}. You'll be able to set a new password after clicking the link in your email.`,
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Send Reset Link",
+          onPress: async () => {
+            if (!user.email) return; // Additional safety check
+            const { error } = await resetPassword(user.email);
+            if (error) {
+              Alert.alert(
+                "Error",
+                error.message || "Failed to send reset email"
+              );
+            } else {
+              Alert.alert(
+                "Reset Email Sent! 📧",
+                "Check your email and click the reset link to set a new password. The link will redirect you back to the app.",
+                [{ text: "OK" }]
+              );
+            }
+          },
+        },
+      ]
+    );
+  };
+
   if (loading && !profile) {
     return (
       <AppBackground>
@@ -542,6 +580,22 @@ export default function SettingsPage() {
           </TouchableOpacity>
         </View>
 
+        {/* Security Section */}
+        <View style={styles.settingsCard}>
+          <Text style={styles.cardTitle}>Security</Text>
+
+          <TouchableOpacity
+            style={styles.settingRow}
+            onPress={handleResetPassword}
+          >
+            <View style={styles.settingLeft}>
+              <Key color="#EF4444" size={20} />
+              <Text style={styles.settingLabel}>Reset Password</Text>
+            </View>
+            <Text style={styles.settingValue}>Change your password</Text>
+          </TouchableOpacity>
+        </View>
+
         <View style={styles.bottomSpacer} />
       </ScrollView>
     </AppBackground>
@@ -719,10 +773,16 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "rgba(255, 255, 255, 0.05)",
   },
+  settingLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginRight: 10,
+  },
   settingLabel: {
     fontSize: 16,
     color: "#FFFFFF",
     fontWeight: "500",
+    marginLeft: 8,
   },
   settingValue: {
     fontSize: 16,

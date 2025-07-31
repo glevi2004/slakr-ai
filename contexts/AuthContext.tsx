@@ -1,12 +1,10 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
-import { Session, User, AuthError } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
 import { presenceService } from "@/services/presenceService";
 import { StorageService } from "@/services/storageService";
+import { AuthError, Session, User } from "@supabase/supabase-js";
 import { makeRedirectUri } from "expo-auth-session";
-import * as QueryParams from "expo-auth-session/build/QueryParams";
 import * as WebBrowser from "expo-web-browser";
-import * as Linking from "expo-linking";
+import React, { createContext, useContext, useEffect, useState } from "react";
 
 // Required for web only
 WebBrowser.maybeCompleteAuthSession();
@@ -18,6 +16,7 @@ interface AuthContextType {
   signUp: (
     email: string,
     password: string,
+    username: string,
     fullName: string,
     avatarUrl?: string
   ) => Promise<{ error: AuthError | null }>;
@@ -27,59 +26,10 @@ interface AuthContextType {
   ) => Promise<{ error: AuthError | null }>;
   signOut: () => Promise<{ error: AuthError | null }>;
   refreshSession: () => Promise<{ error: AuthError | null }>;
+  resetPassword: (email: string) => Promise<{ error: AuthError | null }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-// Helper function to get the redirect URL
-const getRedirectURL = () => {
-  const redirectTo = makeRedirectUri();
-  console.log("🔗 Redirect URL generated:", redirectTo);
-  return redirectTo;
-};
-
-// Helper function to create session from URL
-const createSessionFromUrl = async (url: string) => {
-  console.log("🔗 Processing deep link URL:", url);
-
-  try {
-    const { params, errorCode } = QueryParams.getQueryParams(url);
-    console.log("📝 URL params:", params);
-    console.log("❌ Error code:", errorCode);
-
-    if (errorCode) {
-      console.error("❌ URL contained error:", errorCode);
-      throw new Error(errorCode);
-    }
-
-    const { access_token, refresh_token, type } = params;
-    console.log("🔑 Token type:", type);
-    console.log("🔑 Access token present:", !!access_token);
-    console.log("🔑 Refresh token present:", !!refresh_token);
-
-    if (!access_token) {
-      console.log("⚠️ No access token found in URL");
-      return;
-    }
-
-    console.log("🔄 Setting session with tokens...");
-    const { data, error } = await supabase.auth.setSession({
-      access_token,
-      refresh_token,
-    });
-
-    if (error) {
-      console.error("❌ Error setting session:", error);
-      throw error;
-    }
-
-    console.log("✅ Session created successfully from URL");
-    return data.session;
-  } catch (error) {
-    console.error("❌ Failed to create session from URL:", error);
-    throw error;
-  }
-};
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -117,31 +67,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     });
 
-    // Handle deep linking for email verification
-    const handleDeepLink = async (event: { url: string }) => {
-      console.log("🔗 Deep link received:", event.url);
-      try {
-        await createSessionFromUrl(event.url);
-        console.log("✅ Deep link processed successfully");
-      } catch (error) {
-        console.error("❌ Failed to process deep link:", error);
-      }
-    };
-
-    // Listen for deep links
-    const linkingSubscription = Linking.addEventListener("url", handleDeepLink);
-
-    // Check if app was opened from a deep link
-    Linking.getInitialURL().then((url) => {
-      if (url) {
-        console.log("🔗 App opened with initial URL:", url);
-        handleDeepLink({ url });
-      }
-    });
-
     return () => {
       subscription.unsubscribe();
-      linkingSubscription.remove();
       // Cleanup presence when component unmounts
       presenceService.cleanup();
     };
@@ -150,6 +77,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signUp = async (
     email: string,
     password: string,
+    username: string,
     fullName: string,
     avatarUri?: string
   ) => {
@@ -157,7 +85,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log("🚀 Starting user registration...");
 
       // Get redirect URL for email verification
-      const redirectTo = getRedirectURL();
+      const redirectTo = makeRedirectUri();
       console.log("📧 Email verification will redirect to:", redirectTo);
 
       // First, create the user account
@@ -168,6 +96,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           emailRedirectTo: redirectTo,
           data: {
             full_name: fullName,
+            username: username,
             avatar_url: null, // Will be updated after upload
           },
         },
@@ -191,6 +120,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           "📧 Email verification required. Check your email for confirmation link."
         );
         console.log("🔗 Verification link will redirect to:", redirectTo);
+
+        // Create initial profile record with username and full_name
+        const { error: profileError } = await supabase.from("profiles").insert({
+          id: authData.user.id,
+          username: username,
+          full_name: fullName,
+          avatar_url: null,
+          school: null,
+          grade: null,
+          major: null,
+          bio: null,
+          updated_at: new Date().toISOString(),
+        });
+
+        if (profileError) {
+          console.error("⚠️ Failed to create initial profile:", profileError);
+          // Don't fail registration if profile creation fails
+        } else {
+          console.log("✅ Initial profile created successfully");
+        }
+
         return { error: null }; // Success, but user needs to verify email
       }
 
@@ -216,6 +166,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const { error: metadataError } = await supabase.auth.updateUser({
           data: {
             full_name: fullName,
+            username: username,
             avatar_url: finalAvatarUrl,
           },
         });
@@ -228,14 +179,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Also update the profiles table (this is where the app reads from)
         const { error: profileError } = await supabase
           .from("profiles")
-          .update({ avatar_url: finalAvatarUrl })
+          .update({
+            username: username,
+            full_name: fullName,
+            avatar_url: finalAvatarUrl,
+          })
           .eq("id", authData.user.id);
 
         if (profileError) {
-          console.error("⚠️ Failed to update profile avatar:", profileError);
+          console.error("⚠️ Failed to update profile:", profileError);
           // Don't fail registration if profile update fails
         } else {
-          console.log("✅ Profile avatar URL updated successfully");
+          console.log("✅ Profile updated successfully");
+        }
+      } else {
+        // No avatar, but still need to create/update profile with username and full_name
+        const { error: profileError } = await supabase.from("profiles").upsert({
+          id: authData.user.id,
+          username: username,
+          full_name: fullName,
+          avatar_url: null,
+          school: null,
+          grade: null,
+          major: null,
+          bio: null,
+          updated_at: new Date().toISOString(),
+        });
+
+        if (profileError) {
+          console.error("⚠️ Failed to create/update profile:", profileError);
+          // Don't fail registration if profile update fails
+        } else {
+          console.log("✅ Profile created/updated successfully");
         }
       }
 
@@ -332,6 +307,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const resetPassword = async (email: string) => {
+    try {
+      console.log("🔄 Starting password reset...");
+
+      // Use the base URL that Supabase expects
+      // Supabase will append the tokens automatically
+      let redirectTo;
+      if (typeof window !== "undefined" && window.location) {
+        // Web environment - use current origin
+        redirectTo = `${window.location.protocol}//${window.location.host}`;
+      } else {
+        // Mobile environment - use Expo deep link
+        redirectTo = makeRedirectUri();
+      }
+
+      console.log("📧 Password reset will redirect to:", redirectTo);
+
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo,
+      });
+
+      if (error) {
+        console.error("❌ Password reset error:", error);
+        return { error };
+      }
+
+      console.log("✅ Password reset initiated. Check your email.");
+      return { error: null };
+    } catch (error) {
+      console.error("❌ Network error during password reset:", error);
+      return { error: error as AuthError };
+    }
+  };
+
   const value = {
     user,
     session,
@@ -340,6 +349,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signIn,
     signOut,
     refreshSession,
+    resetPassword,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

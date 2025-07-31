@@ -23,6 +23,7 @@ export default function RegisterScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [username, setUsername] = useState("");
   const [fullName, setFullName] = useState("");
   const [avatarUri, setAvatarUri] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -86,7 +87,7 @@ export default function RegisterScreen() {
   };
 
   const handleRegister = async () => {
-    if (!email || !password || !confirmPassword || !fullName) {
+    if (!email || !password || !confirmPassword || !username || !fullName) {
       Alert.alert("Error", "Please fill in all required fields");
       return;
     }
@@ -101,6 +102,19 @@ export default function RegisterScreen() {
       return;
     }
 
+    if (username.trim().length < 3) {
+      Alert.alert("Error", "Username must be at least 3 characters");
+      return;
+    }
+
+    if (!/^[a-zA-Z0-9_]+$/.test(username.trim())) {
+      Alert.alert(
+        "Error",
+        "Username can only contain letters, numbers, and underscores"
+      );
+      return;
+    }
+
     if (fullName.trim().length < 2) {
       Alert.alert("Error", "Full name must be at least 2 characters");
       return;
@@ -110,6 +124,7 @@ export default function RegisterScreen() {
     const { error } = await signUp(
       email,
       password,
+      username.trim(),
       fullName.trim(),
       avatarUri || undefined
     );
@@ -190,6 +205,18 @@ export default function RegisterScreen() {
               </View>
               {/* Full Name */}
               <View style={styles.form}>
+                <View style={styles.inputContainer}>
+                  <Text style={styles.label}>Username</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={username}
+                    onChangeText={setUsername}
+                    placeholder="Enter your username"
+                    placeholderTextColor="#666"
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                  />
+                </View>
                 <View style={styles.inputContainer}>
                   <Text style={styles.label}>Full Name</Text>
                   <TextInput
