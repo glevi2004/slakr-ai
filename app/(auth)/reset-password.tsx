@@ -5,7 +5,6 @@ import { router } from "expo-router";
 import { Eye, EyeOff } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
 import {
-  Alert,
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
@@ -47,25 +46,14 @@ export default function ResetPasswordScreen() {
         if (session?.user) {
           console.log("✅ Valid recovery session found");
           setHasValidSession(true);
+          router.replace("/(auth)/login");
         } else {
           console.log("❌ No valid recovery session");
-          Alert.alert(
-            "Invalid Reset Link",
-            "This password reset link is invalid or has expired. Please request a new one.",
-            [
-              {
-                text: "OK",
-                onPress: () => router.replace("/(auth)/login"),
-              },
-            ]
-          );
+          router.replace("/(auth)/login");
         }
       } catch (error) {
         console.error("❌ Error checking recovery session:", error);
-        Alert.alert(
-          "Error",
-          "Failed to validate reset link. Please try again."
-        );
+        router.replace("/(auth)/login");
       } finally {
         setInitializing(false);
       }
@@ -76,17 +64,20 @@ export default function ResetPasswordScreen() {
 
   const handleResetPassword = async () => {
     if (!newPassword || !confirmPassword) {
-      Alert.alert("Error", "Please fill in all fields");
+      console.log("❌ Empty fields, redirecting to login");
+      router.replace("/(auth)/login");
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      Alert.alert("Error", "Passwords do not match");
+      console.log("❌ Passwords don't match, redirecting to login");
+      router.replace("/(auth)/login");
       return;
     }
 
     if (newPassword.length < 6) {
-      Alert.alert("Error", "Password must be at least 6 characters");
+      console.log("❌ Password too short, redirecting to login");
+      router.replace("/(auth)/login");
       return;
     }
 
@@ -94,34 +85,22 @@ export default function ResetPasswordScreen() {
 
     try {
       console.log("🔄 Updating password...");
-      const { error } = await supabase.auth.updateUser({
+
+      // Simple password update - don't wait for response
+      supabase.auth.updateUser({
         password: newPassword,
       });
 
-      if (error) {
-        console.error("❌ Password update error:", error);
-        Alert.alert("Error", error.message || "Failed to update password");
-      } else {
-        console.log("✅ Password updated successfully");
-        Alert.alert(
-          "Success! 🎉",
-          "Your password has been updated successfully.",
-          [
-            {
-              text: "OK",
-              onPress: () => {
-                router.replace("/(main)/");
-              },
-            },
-          ]
-        );
-      }
+      // Wait a moment then redirect
+      setTimeout(() => {
+        console.log("✅ Redirecting to login");
+        router.replace("/(auth)/login");
+      }, 2000);
     } catch (error) {
-      console.error("❌ Network error during password update:", error);
-      Alert.alert("Error", "Network error. Please try again.");
+      console.error("❌ Error:", error);
+      console.log("🔄 Redirecting to login");
+      router.replace("/(auth)/login");
     }
-
-    setLoading(false);
   };
 
   const goBack = () => {
