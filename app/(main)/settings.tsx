@@ -15,6 +15,7 @@ import {
   ActivityIndicator,
   Alert,
   Image,
+  Linking,
   ScrollView,
   StyleSheet,
   Text,
@@ -355,6 +356,22 @@ export default function SettingsPage() {
     ]);
   };
 
+  const handleFeatureRequests = async () => {
+    try {
+      await Linking.openURL("https://slakr.featurebase.app/");
+    } catch (error) {
+      Alert.alert("Error", "Could not open feature requests page");
+    }
+  };
+
+  const handleBugReports = async () => {
+    try {
+      await Linking.openURL("https://slakr.featurebase.app/");
+    } catch (error) {
+      Alert.alert("Error", "Could not open bug reports page");
+    }
+  };
+
   if (loading && !profile) {
     return (
       <AppBackground>
@@ -560,6 +577,33 @@ export default function SettingsPage() {
               <Text style={styles.settingLabel}>Reset Password</Text>
             </View>
             <Text style={styles.settingValue}>Change your password</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Support Section */}
+        <View style={styles.settingsCard}>
+          <Text style={styles.cardTitle}>Support</Text>
+
+          <TouchableOpacity
+            style={styles.settingRow}
+            onPress={handleFeatureRequests}
+          >
+            <View style={styles.settingLeft}>
+              <MaterialIcons name="lightbulb" size={20} color="#10B981" />
+              <Text style={styles.settingLabel}>Feature Requests</Text>
+            </View>
+            <Text style={styles.settingValue}>Suggest new features</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.settingRow}
+            onPress={handleBugReports}
+          >
+            <View style={styles.settingLeft}>
+              <MaterialIcons name="bug-report" size={20} color="#F59E0B" />
+              <Text style={styles.settingLabel}>Bug Problems</Text>
+            </View>
+            <Text style={styles.settingValue}>Report issues</Text>
           </TouchableOpacity>
         </View>
 
