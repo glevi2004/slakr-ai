@@ -1,18 +1,18 @@
+import { AppBackground } from "@/components/AppBackground";
+import FriendsCard from "@/components/FriendsCard";
+import StreakCard from "@/components/StreakCard";
+import Timer from "@/components/Timer";
+import { Feather } from "@expo/vector-icons";
+import { Image } from "expo-image";
 import React from "react";
 import {
-  View,
+  Alert,
+  ScrollView,
   StyleSheet,
   TouchableOpacity,
-  ScrollView,
-  Alert,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { AppBackground } from "@/components/AppBackground";
-import { Image } from "expo-image";
-import { Bell } from "lucide-react-native";
-import Timer from "@/components/Timer";
-import StreakCard from "@/components/StreakCard";
-import FriendsCard from "@/components/FriendsCard";
 
 export default function MainHomePage() {
   const handleNotificationsPress = () => {
@@ -31,7 +31,7 @@ export default function MainHomePage() {
           style={styles.topNotificationButton}
           onPress={handleNotificationsPress}
         >
-          <Bell size={24} color="#FFFFFF" />
+          <Feather name="bell" size={24} color="#FFFFFF" />
         </TouchableOpacity>
 
         <ScrollView

@@ -1,19 +1,10 @@
-import React, { useState, useEffect, useRef } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
+import { MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import {
-  Pause,
-  Play,
-  CircleStop as StopCircle,
-  Clock,
-  Timer as TimerIcon,
-  TrendingUp,
-  ChevronDown,
-  ChevronUp,
-} from "lucide-react-native";
+import React, { useEffect, useRef, useState } from "react";
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { MIN_SESH_TIME } from "../constants/Timer";
 import { useAuth } from "../contexts/AuthContext";
 import { useTimer } from "../hooks/useTimer";
-import { MIN_SESH_TIME } from "../constants/Timer";
 import { StreakService } from "../services/streakService";
 
 type TimerMode = "session" | "pomodoro" | "focus";
@@ -278,7 +269,8 @@ export default function Timer() {
           }
         }}
       >
-        <TrendingUp
+        <MaterialIcons
+          name="trending-up"
           size={14}
           color={timerMode === "session" ? "#E94131" : "#9DA4AE"}
         />
@@ -305,7 +297,8 @@ export default function Timer() {
           }
         }}
       >
-        <Clock
+        <MaterialIcons
+          name="access-time"
           size={14}
           color={timerMode === "pomodoro" ? "#E94131" : "#9DA4AE"}
         />
@@ -332,7 +325,8 @@ export default function Timer() {
           }
         }}
       >
-        <TimerIcon
+        <MaterialIcons
+          name="timer"
           size={14}
           color={timerMode === "focus" ? "#E94131" : "#9DA4AE"}
         />
@@ -358,7 +352,11 @@ export default function Timer() {
           style={styles.settingsButton}
           onPress={() => setShowSettings(!showSettings)}
         >
-          <Clock size={16} color={showSettings ? "#E94131" : "#9DA4AE"} />
+          <MaterialIcons
+            name="settings"
+            size={16}
+            color={showSettings ? "#E94131" : "#9DA4AE"}
+          />
           <Text
             style={[
               styles.settingsButtonText,
@@ -368,9 +366,13 @@ export default function Timer() {
             Settings
           </Text>
           {showSettings ? (
-            <ChevronUp size={16} color="#E94131" />
+            <MaterialIcons name="keyboard-arrow-up" size={16} color="#E94131" />
           ) : (
-            <ChevronDown size={16} color="#9DA4AE" />
+            <MaterialIcons
+              name="keyboard-arrow-down"
+              size={16}
+              color="#9DA4AE"
+            />
           )}
         </TouchableOpacity>
       </View>
@@ -514,7 +516,7 @@ export default function Timer() {
               style={[styles.sessionButton, styles.sessionEndButton]}
               onPress={handleStop}
             >
-              <StopCircle size={20} color="#FFFFFF" />
+              <MaterialIcons name="stop" size={20} color="#FFFFFF" />
               <Text style={styles.sessionButtonText}>End</Text>
             </TouchableOpacity>
 
@@ -523,9 +525,9 @@ export default function Timer() {
               onPress={handlePause}
             >
               {getCurrentIsPaused() ? (
-                <Play size={20} color="#FFFFFF" />
+                <MaterialIcons name="play-arrow" size={20} color="#FFFFFF" />
               ) : (
-                <Pause size={20} color="#FFFFFF" />
+                <MaterialIcons name="pause" size={20} color="#FFFFFF" />
               )}
               <Text style={styles.sessionButtonText}>
                 {getCurrentIsPaused() ? "Resume" : "Pause"}
@@ -543,7 +545,7 @@ export default function Timer() {
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
             >
-              <Play size={20} color="#FFFFFF" />
+              <MaterialIcons name="play-arrow" size={20} color="#FFFFFF" />
               <Text style={styles.sessionButtonText}>Start Sesh</Text>
             </LinearGradient>
           </TouchableOpacity>

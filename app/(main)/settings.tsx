@@ -1,39 +1,27 @@
-import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-  TextInput,
-  Alert,
-  Image,
-  ActivityIndicator,
-} from "react-native";
-import {
-  ArrowLeft,
-  LogOut,
-  Edit3,
-  User,
-  School,
-  GraduationCap,
-  BookOpen,
-  Camera,
-  Save,
-  X,
-  Key,
-} from "lucide-react-native";
-import { useRouter } from "expo-router";
 import { AppBackground } from "@/components/AppBackground";
+import GradeDropdown from "@/components/GradeDropdown";
+import LoadingIndicator from "@/components/LoadingIndicator";
+import MajorDropdown from "@/components/MajorDropdown";
+import UniversityDropdown from "@/components/UniversityDropdown";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/lib/supabase";
 import { ProfileService, UserProfile } from "@/services/profileService";
 import { StorageService } from "@/services/storageService";
-import { supabase } from "@/lib/supabase";
-import UniversityDropdown from "@/components/UniversityDropdown";
-import GradeDropdown from "@/components/GradeDropdown";
-import MajorDropdown from "@/components/MajorDropdown";
-import LoadingIndicator from "@/components/LoadingIndicator";
+import { Feather, MaterialIcons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
+import { useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 export default function SettingsPage() {
   const { user, signOut, resetPassword } = useAuth();
@@ -351,41 +339,20 @@ export default function SettingsPage() {
     </View>
   );
 
-  const handleResetPassword = async () => {
-    if (!user?.email) {
-      Alert.alert("Error", "No email found for your account");
-      return;
-    }
-
-    Alert.alert(
-      "Reset Password",
-      `A password reset link will be sent to ${user.email}. You'll be able to set a new password after clicking the link in your email.`,
-      [
-        {
-          text: "Cancel",
-          style: "cancel",
+  const handleResetPassword = () => {
+    Alert.alert("Reset Password", "Do you want to change your password?", [
+      {
+        text: "Cancel",
+        style: "cancel",
+      },
+      {
+        text: "Change Password",
+        onPress: () => {
+          // Navigate directly to reset password screen
+          router.push("/(auth)/reset-password");
         },
-        {
-          text: "Send Reset Link",
-          onPress: async () => {
-            if (!user.email) return; // Additional safety check
-            const { error } = await resetPassword(user.email);
-            if (error) {
-              Alert.alert(
-                "Error",
-                error.message || "Failed to send reset email"
-              );
-            } else {
-              Alert.alert(
-                "Reset Email Sent! 📧",
-                "Check your email and click the reset link to set a new password. The link will redirect you back to the app.",
-                [{ text: "OK" }]
-              );
-            }
-          },
-        },
-      ]
-    );
+      },
+    ]);
   };
 
   if (loading && !profile) {
@@ -405,14 +372,14 @@ export default function SettingsPage() {
             style={styles.backButton}
             onPress={() => router.push("/(main)/profile")}
           >
-            <ArrowLeft color="#FFFFFF" size={24} />
+            <Feather name="arrow-left" size={24} color="#FFFFFF" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Settings</Text>
           <TouchableOpacity
             style={styles.signOutButton}
             onPress={handleSignOut}
           >
-            <LogOut color="#FF4444" size={24} />
+            <MaterialIcons name="logout" size={24} color="#FF4444" />
           </TouchableOpacity>
         </View>
 
@@ -430,7 +397,7 @@ export default function SettingsPage() {
               />
             ) : (
               <View style={styles.profilePicturePlaceholder}>
-                <User color="#FFFFFF" size={40} />
+                <MaterialIcons name="person" size={40} color="#FFFFFF" />
               </View>
             )}
 
@@ -443,7 +410,7 @@ export default function SettingsPage() {
 
             {/* Edit icon */}
             <View style={styles.cameraButton}>
-              <Camera color="#FFFFFF" size={16} />
+              <MaterialIcons name="camera-alt" size={16} color="#FFFFFF" />
             </View>
           </TouchableOpacity>
           <Text style={styles.emailText}>{user?.email}</Text>
@@ -466,14 +433,14 @@ export default function SettingsPage() {
             >
               {isEditing ? (
                 <>
-                  <Save color="#10B981" size={20} />
+                  <MaterialIcons name="save" size={20} color="#10B981" />
                   <Text style={[styles.editButtonText, { color: "#10B981" }]}>
                     Save
                   </Text>
                 </>
               ) : (
                 <>
-                  <Edit3 color="#3B82F6" size={20} />
+                  <MaterialIcons name="edit" size={20} color="#3B82F6" />
                   <Text style={styles.editButtonText}>Edit</Text>
                 </>
               )}
@@ -481,7 +448,7 @@ export default function SettingsPage() {
           </View>
 
           {renderProfileField(
-            <User color="#3B82F6" size={20} />,
+            <MaterialIcons name="person" size={20} color="#3B82F6" />,
             "Full Name",
             profile?.full_name || "",
             "Enter your full name",
@@ -489,7 +456,7 @@ export default function SettingsPage() {
           )}
 
           {renderProfileField(
-            <User color="#10B981" size={20} />,
+            <MaterialIcons name="person" size={20} color="#10B981" />,
             "Username",
             profile?.username || "",
             "Enter a username (min 3 characters)",
@@ -497,7 +464,7 @@ export default function SettingsPage() {
           )}
 
           {renderProfileField(
-            <School color="#F59E0B" size={20} />,
+            <MaterialIcons name="school" size={20} color="#F59E0B" />,
             "School",
             profile?.school || "",
             "Select your university",
@@ -508,7 +475,7 @@ export default function SettingsPage() {
           )}
 
           {renderProfileField(
-            <GraduationCap color="#8B5CF6" size={20} />,
+            <MaterialIcons name="school" size={20} color="#8B5CF6" />,
             "Grade",
             profile?.grade || "",
             "Select your grade level",
@@ -518,7 +485,7 @@ export default function SettingsPage() {
           )}
 
           {renderProfileField(
-            <BookOpen color="#EF4444" size={20} />,
+            <MaterialIcons name="book" size={20} color="#EF4444" />,
             "Major",
             profile?.major || "",
             "Enter your major or field of study",
@@ -530,7 +497,7 @@ export default function SettingsPage() {
           )}
 
           {renderProfileField(
-            <Edit3 color="#6B7280" size={20} />,
+            <MaterialIcons name="edit" size={20} color="#6B7280" />,
             "Bio",
             profile?.bio || "",
             "Tell us about yourself...",
@@ -554,7 +521,7 @@ export default function SettingsPage() {
                 });
               }}
             >
-              <X color="#EF4444" size={20} />
+              <MaterialIcons name="close" size={20} color="#EF4444" />
               <Text style={styles.cancelButtonText}>Cancel</Text>
             </TouchableOpacity>
           )}
@@ -589,7 +556,7 @@ export default function SettingsPage() {
             onPress={handleResetPassword}
           >
             <View style={styles.settingLeft}>
-              <Key color="#EF4444" size={20} />
+              <MaterialIcons name="key" size={20} color="#EF4444" />
               <Text style={styles.settingLabel}>Reset Password</Text>
             </View>
             <Text style={styles.settingValue}>Change your password</Text>

@@ -1,23 +1,23 @@
+import { AppBackground } from "@/components/AppBackground";
+import { useAuth } from "@/contexts/AuthContext";
+import { Feather } from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
+import { LinearGradient } from "expo-linear-gradient";
+import { router } from "expo-router";
 import React, { useState } from "react";
 import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
   Alert,
+  Image,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Image,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { LinearGradient } from "expo-linear-gradient";
-import { router } from "expo-router";
-import * as ImagePicker from "expo-image-picker";
-import { Eye, EyeOff } from "lucide-react-native";
-import { AppBackground } from "@/components/AppBackground";
-import { useAuth } from "@/contexts/AuthContext";
 
 export default function RegisterScreen() {
   const [email, setEmail] = useState("");
@@ -266,9 +266,9 @@ export default function RegisterScreen() {
                       onPress={() => setShowPassword(!showPassword)}
                     >
                       {showPassword ? (
-                        <EyeOff color="#9DA4AE" size={20} />
+                        <Feather name="eye-off" size={20} color="#9DA4AE" />
                       ) : (
-                        <Eye color="#9DA4AE" size={20} />
+                        <Feather name="eye" size={20} color="#9DA4AE" />
                       )}
                     </TouchableOpacity>
                   </View>
@@ -297,9 +297,9 @@ export default function RegisterScreen() {
                       }
                     >
                       {showConfirmPassword ? (
-                        <EyeOff color="#9DA4AE" size={20} />
+                        <Feather name="eye-off" size={20} color="#9DA4AE" />
                       ) : (
-                        <Eye color="#9DA4AE" size={20} />
+                        <Feather name="eye" size={20} color="#9DA4AE" />
                       )}
                     </TouchableOpacity>
                   </View>

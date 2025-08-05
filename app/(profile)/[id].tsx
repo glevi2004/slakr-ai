@@ -1,28 +1,21 @@
-import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  Image,
-  Platform,
-  TouchableOpacity,
-} from "react-native";
-import {
-  User,
-  Award,
-  Clock,
-  Target,
-  TrendingUp,
-  ChevronLeft,
-} from "lucide-react-native";
-import { useRouter, useLocalSearchParams } from "expo-router";
 import { AppBackground } from "@/components/AppBackground";
+import LoadingIndicator from "@/components/LoadingIndicator";
+import { getUserLevel } from "@/constants/Levels";
 import { useAuth } from "@/contexts/AuthContext";
 import { ProfileService, UserProfile } from "@/services/profileService";
-import LoadingIndicator from "@/components/LoadingIndicator";
 import { StreakService, UserStreak } from "@/services/streakService";
-import { getUserLevel } from "@/constants/Levels";
+import { Feather, MaterialIcons } from "@expo/vector-icons";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
+import {
+  Image,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 export default function FriendProfilePage() {
   const { id } = useLocalSearchParams();
@@ -79,6 +72,64 @@ export default function FriendProfilePage() {
       : `${hours}h`;
   };
 
+  // Function to parse university field and extract name and location
+  const parseUniversityField = (universityField: string) => {
+    if (!universityField) return { name: "", location: "" };
+
+    const firstCommaIndex = universityField.indexOf(",");
+    if (firstCommaIndex === -1) {
+      // No comma found, return the whole string as name
+      return { name: universityField.trim(), location: "" };
+    }
+
+    const name = universityField.substring(0, firstCommaIndex).trim();
+    const location = universityField.substring(firstCommaIndex + 1).trim();
+
+    return { name, location };
+  };
+
+  // Function to render academic field with settings page styling
+  const renderAcademicField = (
+    icon: React.ReactNode,
+    label: string,
+    value: string | null,
+    isUniversityField: boolean = false
+  ) => {
+    const displayValue = value || `No ${label.toLowerCase()} set`;
+
+    return (
+      <View style={styles.academicFieldContainer}>
+        <View style={styles.academicFieldHeader}>
+          {icon}
+          <Text style={styles.academicFieldLabel}>{label}</Text>
+        </View>
+        {isUniversityField && value ? (
+          <View style={styles.universityFieldContainer}>
+            <View style={styles.universityContent}>
+              {(() => {
+                const { name, location } = parseUniversityField(value);
+                return (
+                  <>
+                    <Text style={styles.academicFieldValue}>
+                      {name || value}
+                    </Text>
+                    {location && (
+                      <View style={styles.locationBadge}>
+                        <Text style={styles.locationBadgeText}>{location}</Text>
+                      </View>
+                    )}
+                  </>
+                );
+              })()}
+            </View>
+          </View>
+        ) : (
+          <Text style={styles.academicFieldValue}>{displayValue}</Text>
+        )}
+      </View>
+    );
+  };
+
   const renderStatCard = (
     icon: React.ReactNode,
     label: string,
@@ -113,7 +164,7 @@ export default function FriendProfilePage() {
             onPress={() => router.back()}
           >
             <View style={styles.backButtonContent}>
-              <ChevronLeft color="#3B82F6" size={24} />
+              <Feather name="arrow-left" size={24} color="#3B82F6" />
               <Text style={styles.backText}>Back</Text>
             </View>
           </TouchableOpacity>
@@ -136,7 +187,7 @@ export default function FriendProfilePage() {
                   />
                 ) : (
                   <View style={styles.avatarPlaceholder}>
-                    <User color="#FFFFFF" size={32} />
+                    <Feather name="user" size={32} color="#FFFFFF" />
                   </View>
                 )}
               </View>
@@ -162,19 +213,19 @@ export default function FriendProfilePage() {
             <Text style={styles.sectionTitle}>Study Statistics</Text>
             <View style={styles.statsGrid}>
               {renderStatCard(
-                <Target color="#3B82F6" size={24} />,
+                <MaterialIcons name="my-location" size={24} color="#3B82F6" />,
                 "Current Streak",
                 streakData?.current_streak || 0,
                 " days"
               )}
               {renderStatCard(
-                <Award color="#F59E0B" size={24} />,
+                <MaterialIcons name="star" size={24} color="#F59E0B" />,
                 "Best Streak",
                 streakData?.longest_streak || 0,
                 " days"
               )}
               {renderStatCard(
-                <Clock color="#10B981" size={24} />,
+                <MaterialIcons name="access-time" size={24} color="#10B981" />,
                 "Total Time",
                 formatTime(
                   Math.round((streakData?.total_study_time_seconds || 0) / 60)
@@ -198,6 +249,7 @@ export default function FriendProfilePage() {
                     ]}
                   >
                     <userLevel.currentLevel.icon
+                      name={userLevel.currentLevel.iconName}
                       size={32}
                       color={userLevel.currentLevel.color}
                     />
@@ -235,24 +287,25 @@ export default function FriendProfilePage() {
           {/* Academic Information */}
           <View style={styles.infoCard}>
             <Text style={styles.sectionTitle}>Academic Information</Text>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>School</Text>
-              <Text style={styles.infoValue}>
-                {profile?.school || "Not set"}
-              </Text>
-            </View>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Grade</Text>
-              <Text style={styles.infoValue}>
-                {profile?.grade || "Not set"}
-              </Text>
-            </View>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Major</Text>
-              <Text style={styles.infoValue}>
-                {profile?.major || "Not set"}
-              </Text>
-            </View>
+
+            {renderAcademicField(
+              <MaterialIcons name="school" size={20} color="#F59E0B" />,
+              "School",
+              profile?.school ?? null,
+              true // isUniversityField
+            )}
+
+            {renderAcademicField(
+              <MaterialIcons name="school" size={20} color="#8B5CF6" />,
+              "Grade",
+              profile?.grade ?? null
+            )}
+
+            {renderAcademicField(
+              <MaterialIcons name="book" size={20} color="#EF4444" />,
+              "Major",
+              profile?.major ?? null
+            )}
           </View>
 
           <View style={styles.bottomSpacer} />
@@ -501,5 +554,48 @@ const styles = StyleSheet.create({
   progressBarFill: {
     height: "100%",
     borderRadius: 4,
+  },
+  // Academic field styles (matching settings page)
+  academicFieldContainer: {
+    marginBottom: 20,
+  },
+  academicFieldHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  academicFieldLabel: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "600",
+    marginLeft: 8,
+  },
+  academicFieldValue: {
+    color: "rgba(255, 255, 255, 0.8)",
+    fontSize: 16,
+    paddingLeft: 28,
+  },
+  universityFieldContainer: {
+    // No margin needed - parent container already handles positioning
+  },
+  universityContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginRight: 20,
+  },
+  locationBadge: {
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    borderRadius: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    marginLeft: 8,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.2)",
+  },
+  locationBadgeText: {
+    color: "rgba(255, 255, 255, 0.8)",
+    fontSize: 12,
+    fontWeight: "500",
   },
 });

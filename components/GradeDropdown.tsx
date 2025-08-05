@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from "react";
+import { Feather } from "@expo/vector-icons";
+import React, { useEffect, useState } from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Modal,
   FlatList,
+  Modal,
+  StyleSheet,
+  Text,
   TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import { ChevronDown, Search } from "lucide-react-native";
 
 // Grade options
 const GRADE_OPTIONS = [
@@ -70,7 +70,11 @@ const GradeDropdown: React.FC<GradeDropdownProps> = ({
         onPress={() => setVisible(true)}
       >
         <Text style={styles.gradeTriggerText}>{value || placeholder}</Text>
-        <ChevronDown color="rgba(255, 255, 255, 0.6)" size={20} />
+        <Feather
+          name="chevron-down"
+          size={20}
+          color="rgba(255, 255, 255, 0.6)"
+        />
       </TouchableOpacity>
 
       <Modal
@@ -86,7 +90,11 @@ const GradeDropdown: React.FC<GradeDropdownProps> = ({
         >
           <View style={styles.modalContent}>
             <View style={styles.searchContainer}>
-              <Search color="rgba(255, 255, 255, 0.6)" size={20} />
+              <Feather
+                name="search"
+                size={20}
+                color="rgba(255, 255, 255, 0.6)"
+              />
               <TextInput
                 style={styles.searchInput}
                 placeholder="Search grades..."

@@ -1,31 +1,20 @@
-import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Image,
-  ScrollView,
-  ActivityIndicator,
-} from "react-native";
-import {
-  Flame,
-  Clock,
-  Users,
-  Trophy,
-  Activity,
-  Play,
-  ChevronDown,
-  ChevronUp,
-  Crown,
-} from "lucide-react-native";
 import { useAuth } from "@/contexts/AuthContext";
 import { FriendsService, FriendWithProfile } from "@/services/friendsService";
-import { StreakService } from "@/services/streakService";
-import { SessionService } from "@/services/sessionService";
 import { presenceService } from "@/services/presenceService";
-import Tooltip from "./ui/Tooltip";
+import { StreakService } from "@/services/streakService";
+import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import Tooltip from "./ui/Tooltip";
 
 interface Friend {
   id: string;
@@ -293,7 +282,8 @@ export default function FriendsCard() {
           ]}
           onPress={() => setSortMode("leaderboard")}
         >
-          <Trophy
+          <Ionicons
+            name="trophy"
             size={14}
             color={
               sortMode === "leaderboard"
@@ -318,7 +308,8 @@ export default function FriendsCard() {
           ]}
           onPress={() => setSortMode("active")}
         >
-          <Activity
+          <Ionicons
+            name="pulse"
             size={14}
             color={
               sortMode === "active"
@@ -359,7 +350,7 @@ export default function FriendsCard() {
             {/* Rank */}
             <View style={styles.rankContainer}>
               {isFirst && sortMode === "leaderboard" ? (
-                <Crown size={18} color="#FFD700" />
+                <Ionicons name="star" size={18} color="#FFD700" />
               ) : (
                 <Text style={styles.rankText}>{index + 1}</Text>
               )}
@@ -398,7 +389,7 @@ export default function FriendsCard() {
               <View style={styles.friendStats}>
                 {sortMode === "active" && friend.lastSeen ? (
                   <View style={styles.statItem}>
-                    <Clock size={12} color="#4CAF50" />
+                    <Ionicons name="time-outline" size={12} color="#4CAF50" />
                     <Text style={styles.statText}>
                       {formatLastSeen(friend.lastSeen)}
                     </Text>
@@ -406,13 +397,13 @@ export default function FriendsCard() {
                 ) : (
                   <>
                     <View style={styles.statItem}>
-                      <Clock size={12} color="#E94131" />
+                      <Ionicons name="time-outline" size={12} color="#E94131" />
                       <Text style={styles.statText}>
                         {formatTime(friend.totalMinutes)}
                       </Text>
                     </View>
                     <View style={styles.statItem}>
-                      <Flame size={12} color="#FF6B35" />
+                      <Ionicons name="flame" size={12} color="#FF6B35" />
                       <Text style={styles.statText}>{friend.streak}</Text>
                     </View>
                   </>
@@ -424,12 +415,20 @@ export default function FriendsCard() {
             {isInSession && friend.currentSessionStart && (
               <View style={styles.sessionIndicatorContainer}>
                 <View style={styles.inSessionIcon}>
-                  <Play size={14} color="#4CAF50" fill="#4CAF50" />
+                  <Ionicons name="play-circle" size={14} color="#4CAF50" />
                 </View>
                 {isExpanded ? (
-                  <ChevronUp size={16} color="rgba(255, 255, 255, 0.6)" />
+                  <Ionicons
+                    name="chevron-up"
+                    size={16}
+                    color="rgba(255, 255, 255, 0.6)"
+                  />
                 ) : (
-                  <ChevronDown size={16} color="rgba(255, 255, 255, 0.6)" />
+                  <Ionicons
+                    name="chevron-down"
+                    size={16}
+                    color="rgba(255, 255, 255, 0.6)"
+                  />
                 )}
               </View>
             )}
@@ -441,7 +440,7 @@ export default function FriendsCard() {
               <View style={styles.sessionDetails}>
                 <View style={styles.sessionInfo}>
                   <View style={styles.sessionTimeContainer}>
-                    <Clock size={18} color="#4CAF50" />
+                    <Ionicons name="time-outline" size={18} color="#4CAF50" />
                     <Text style={styles.sessionTimeLabel}>Session Time:</Text>
                     <LiveSessionTime
                       timestamp={friend.currentSessionStart}
@@ -483,7 +482,7 @@ export default function FriendsCard() {
     <View style={styles.friendsCard}>
       <View style={styles.friendsHeader}>
         <View style={styles.titleContainer}>
-          <Users size={18} color="#FFFFFF" />
+          <Ionicons name="people-outline" size={18} color="#FFFFFF" />
           <Tooltip
             text={`${sortedFriends.length} friend${
               sortedFriends.length === 1 ? "" : "s"
@@ -502,7 +501,11 @@ export default function FriendsCard() {
       >
         {sortedFriends.length === 0 ? (
           <View style={styles.emptyContainer}>
-            <Users size={48} color="rgba(255, 255, 255, 0.3)" />
+            <Ionicons
+              name="people-outline"
+              size={48}
+              color="rgba(255, 255, 255, 0.3)"
+            />
             <Text style={styles.emptyText}>No friends yet</Text>
             <Text style={styles.emptySubtext}>
               Add friends to see them on the leaderboard

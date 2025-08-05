@@ -1,27 +1,3 @@
-import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-  TextInput,
-  Alert,
-  Image,
-  RefreshControl,
-} from "react-native";
-import {
-  Users,
-  UserPlus,
-  Search,
-  Check,
-  X,
-  UserMinus,
-  Clock,
-  Circle,
-  BookOpen,
-} from "lucide-react-native";
-import { useFocusEffect } from "@react-navigation/native";
 import { AppBackground } from "@/components/AppBackground";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -30,7 +6,21 @@ import {
   UserSearchResult,
 } from "@/services/friendsService";
 import { presenceService } from "@/services/presenceService";
+import { Feather, Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { useFocusEffect } from "@react-navigation/native";
 import { useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
+import {
+  Alert,
+  Image,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 type TabType = "friends" | "requests" | "search";
 
@@ -102,7 +92,6 @@ export default function FriendsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [refreshing, setRefreshing] = useState(false);
   const [presenceSubscription, setPresenceSubscription] = useState<any>(null);
-  const [showTooltip, setShowTooltip] = useState(false);
 
   const loadFriendsData = React.useCallback(async () => {
     if (!user?.id) return;
@@ -269,7 +258,7 @@ export default function FriendsPage() {
         <Image source={{ uri: user.avatar_url }} style={styles.avatar} />
       ) : (
         <View style={styles.avatarPlaceholder}>
-          <Users color="#FFFFFF" size={20} />
+          <Feather name="user" size={20} color="#FFFFFF" />
         </View>
       )}
     </View>
@@ -293,7 +282,7 @@ export default function FriendsPage() {
             <Image source={{ uri: friend.avatar_url }} style={styles.avatar} />
           ) : (
             <View style={styles.avatarPlaceholder}>
-              <Users color="#FFFFFF" size={20} />
+              <Feather name="user" size={20} color="#FFFFFF" />
             </View>
           )}
           {/* Online status indicator */}
@@ -311,18 +300,26 @@ export default function FriendsPage() {
           <Text style={styles.userHandle}>@{friend.username}</Text>
           <View style={styles.statusContainer}>
             {onlineStatusInfo.status === "studying" && (
-              <BookOpen size={12} color={onlineStatusInfo.color} />
+              <MaterialIcons
+                name="book"
+                size={12}
+                color={onlineStatusInfo.color}
+              />
             )}
             {onlineStatusInfo.status === "online" && (
-              <Circle
+              <Ionicons
+                name="ellipse"
                 size={8}
                 color={onlineStatusInfo.color}
-                fill={onlineStatusInfo.color}
               />
             )}
             {(onlineStatusInfo.status === "away" ||
               onlineStatusInfo.status === "offline") && (
-              <Circle size={8} color={onlineStatusInfo.color} />
+              <Ionicons
+                name="ellipse-outline"
+                size={8}
+                color={onlineStatusInfo.color}
+              />
             )}
             <Text
               style={[styles.onlineStatus, { color: onlineStatusInfo.color }]}
@@ -338,7 +335,7 @@ export default function FriendsPage() {
             handleRemoveFriend(friend.relationship_id);
           }}
         >
-          <UserMinus color="#EF4444" size={20} />
+          <MaterialIcons name="person-remove" size={20} color="#EF4444" />
         </TouchableOpacity>
       </TouchableOpacity>
     );
@@ -363,13 +360,13 @@ export default function FriendsPage() {
               style={styles.acceptButton}
               onPress={() => handleAcceptRequest(request.relationship_id)}
             >
-              <Check color="#FFFFFF" size={16} />
+              <Ionicons name="checkmark" size={16} color="#FFFFFF" />
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.declineButton}
               onPress={() => handleRemoveFriend(request.relationship_id, true)}
             >
-              <X color="#FFFFFF" size={16} />
+              <MaterialIcons name="close" size={16} color="#FFFFFF" />
             </TouchableOpacity>
           </>
         ) : (
@@ -408,7 +405,7 @@ export default function FriendsPage() {
         } else {
           return (
             <View style={styles.pendingLabel}>
-              <Clock color="#F59E0B" size={16} />
+              <MaterialIcons name="access-time" size={16} color="#F59E0B" />
               <Text style={styles.pendingLabelText}>Pending</Text>
             </View>
           );
@@ -419,7 +416,7 @@ export default function FriendsPage() {
             style={styles.addButton}
             onPress={() => handleSendFriendRequest(user.id)}
           >
-            <UserPlus color="#FFFFFF" size={16} />
+            <Ionicons name="person-add" size={16} color="#FFFFFF" />
           </TouchableOpacity>
         );
       }
@@ -448,30 +445,15 @@ export default function FriendsPage() {
             }
           >
             {friends.length > 0 && (
-              <View>
-                <TouchableOpacity
-                  style={styles.friendsCounter}
-                  onPress={() => setShowTooltip(!showTooltip)}
-                  activeOpacity={0.8}
-                >
-                  <Text style={styles.friendsCounterText}>
-                    {friends.length}{" "}
-                    {friends.length === 1 ? "Friend" : "Friends"}
-                  </Text>
-                  {showTooltip && (
-                    <View style={styles.tooltip}>
-                      <Text style={styles.tooltipText}>
-                        You have {friends.length}{" "}
-                        {friends.length === 1 ? "friend" : "friends"} on Slakr
-                      </Text>
-                    </View>
-                  )}
-                </TouchableOpacity>
+              <View style={styles.friendsCounter}>
+                <Text style={styles.friendsCounterText}>
+                  {friends.length} {friends.length === 1 ? "Friend" : "Friends"}
+                </Text>
               </View>
             )}
             {friends.length === 0 ? (
               <View style={styles.emptyState}>
-                <Users color="#6B7280" size={48} />
+                <Ionicons name="people-outline" color="#6B7280" size={48} />
                 <Text style={styles.emptyStateTitle}>No Friends Yet</Text>
                 <Text style={styles.emptyStateText}>
                   Start building your study network by adding friends!
@@ -512,7 +494,7 @@ export default function FriendsPage() {
             {pendingRequests.received.length === 0 &&
               pendingRequests.sent.length === 0 && (
                 <View style={styles.emptyState}>
-                  <Clock color="#6B7280" size={48} />
+                  <MaterialIcons name="access-time" color="#6B7280" size={48} />
                   <Text style={styles.emptyStateTitle}>
                     No Pending Requests
                   </Text>
@@ -528,7 +510,7 @@ export default function FriendsPage() {
         return (
           <View style={styles.tabContent}>
             <View style={styles.searchContainer}>
-              <Search color="#6B7280" size={20} />
+              <Feather name="search" color="#6B7280" size={20} />
               <TextInput
                 style={styles.searchInput}
                 placeholder="Search by username or name..."
@@ -542,7 +524,7 @@ export default function FriendsPage() {
             <ScrollView style={styles.searchResults}>
               {searchQuery.length >= 2 && searchResults.length === 0 ? (
                 <View style={styles.emptyState}>
-                  <Search color="#6B7280" size={48} />
+                  <Feather name="search" color="#6B7280" size={48} />
                   <Text style={styles.emptyStateTitle}>No Users Found</Text>
                   <Text style={styles.emptyStateText}>
                     Try searching for a different username or name
@@ -550,7 +532,7 @@ export default function FriendsPage() {
                 </View>
               ) : searchQuery.length < 2 ? (
                 <View style={styles.emptyState}>
-                  <Search color="#6B7280" size={48} />
+                  <Feather name="search" color="#6B7280" size={48} />
                   <Text style={styles.emptyStateTitle}>Find Friends</Text>
                   <Text style={styles.emptyStateText}>
                     Search for users by username or full name
@@ -579,7 +561,8 @@ export default function FriendsPage() {
             style={[styles.tab, activeTab === "friends" && styles.activeTab]}
             onPress={() => setActiveTab("friends")}
           >
-            <Users
+            <Ionicons
+              name="people-outline"
               color={activeTab === "friends" ? "#3B82F6" : "#6B7280"}
               size={20}
             />
@@ -597,7 +580,8 @@ export default function FriendsPage() {
             style={[styles.tab, activeTab === "requests" && styles.activeTab]}
             onPress={() => setActiveTab("requests")}
           >
-            <Clock
+            <MaterialIcons
+              name="access-time"
               color={activeTab === "requests" ? "#3B82F6" : "#6B7280"}
               size={20}
             />
@@ -624,7 +608,8 @@ export default function FriendsPage() {
             style={[styles.tab, activeTab === "search" && styles.activeTab]}
             onPress={() => setActiveTab("search")}
           >
-            <Search
+            <Feather
+              name="search"
               color={activeTab === "search" ? "#3B82F6" : "#6B7280"}
               size={20}
             />

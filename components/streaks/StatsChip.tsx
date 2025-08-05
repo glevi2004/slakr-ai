@@ -1,9 +1,9 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
-import { LucideIcon } from "lucide-react-native";
+import { StyleSheet, Text, View } from "react-native";
 
 interface StatsChipProps {
-  icon: LucideIcon;
+  icon: React.ComponentType<any>; // Expo vector icon component
+  iconName: string;
   iconColor: string;
   label: string;
   value: number;
@@ -12,6 +12,7 @@ interface StatsChipProps {
 
 export default function StatsChip({
   icon: Icon,
+  iconName,
   iconColor,
   label,
   value,
@@ -31,7 +32,7 @@ export default function StatsChip({
         <View
           style={[styles.iconContainer, { backgroundColor: `${iconColor}20` }]}
         >
-          <Icon size={20} color={iconColor} />
+          <Icon name={iconName} size={20} color={iconColor} />
         </View>
 
         <View style={styles.textContainer}>

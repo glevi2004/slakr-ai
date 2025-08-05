@@ -1,32 +1,22 @@
-import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-  Image,
-  Alert,
-} from "react-native";
-import {
-  Settings,
-  User,
-  Award,
-  Clock,
-  Target,
-  TrendingUp,
-  School,
-  GraduationCap,
-  BookOpen,
-} from "lucide-react-native";
-import { useRouter } from "expo-router";
-import { useFocusEffect } from "@react-navigation/native";
 import { AppBackground } from "@/components/AppBackground";
+import LoadingIndicator from "@/components/LoadingIndicator";
+import { getUserLevel } from "@/constants/Levels";
 import { useAuth } from "@/contexts/AuthContext";
 import { ProfileService, UserProfile } from "@/services/profileService";
-import LoadingIndicator from "@/components/LoadingIndicator";
 import { StreakService, UserStreak } from "@/services/streakService";
-import { getUserLevel } from "@/constants/Levels";
+import { Feather, MaterialIcons } from "@expo/vector-icons";
+import { useFocusEffect } from "@react-navigation/native";
+import { useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
+import {
+  Alert,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 export default function ProfilePage() {
   const { user } = useAuth();
@@ -211,7 +201,7 @@ export default function ProfilePage() {
             style={styles.settingsButton}
             onPress={() => router.push("settings" as any)}
           >
-            <Settings color="#FFFFFF" size={24} />
+            <Feather name="settings" size={24} color="#FFFFFF" />
           </TouchableOpacity>
         </View>
 
@@ -226,7 +216,7 @@ export default function ProfilePage() {
                 />
               ) : (
                 <View style={styles.avatarPlaceholder}>
-                  <User color="#FFFFFF" size={32} />
+                  <Feather name="user" size={32} color="#FFFFFF" />
                 </View>
               )}
             </View>
@@ -253,19 +243,19 @@ export default function ProfilePage() {
           <Text style={styles.sectionTitle}>Study Statistics</Text>
           <View style={styles.statsGrid}>
             {renderStatCard(
-              <Target color="#3B82F6" size={24} />,
+              <MaterialIcons name="my-location" size={24} color="#3B82F6" />,
               "Current Streak",
               streakData?.current_streak || 0,
               " days"
             )}
             {renderStatCard(
-              <Award color="#F59E0B" size={24} />,
+              <MaterialIcons name="star" size={24} color="#F59E0B" />,
               "Best Streak",
               streakData?.longest_streak || 0,
               " days"
             )}
             {renderStatCard(
-              <Clock color="#10B981" size={24} />,
+              <MaterialIcons name="access-time" size={24} color="#10B981" />,
               "Total Time",
               formatTime(
                 Math.round((streakData?.total_study_time_seconds || 0) / 60)
@@ -289,6 +279,7 @@ export default function ProfilePage() {
                   ]}
                 >
                   <userLevel.currentLevel.icon
+                    name={userLevel.currentLevel.iconName}
                     size={32}
                     color={userLevel.currentLevel.color}
                   />
@@ -328,20 +319,20 @@ export default function ProfilePage() {
           <Text style={styles.sectionTitle}>Academic Information</Text>
 
           {renderAcademicField(
-            <School color="#F59E0B" size={20} />,
+            <MaterialIcons name="school" size={20} color="#F59E0B" />,
             "School",
             profile?.school ?? null,
             true // isUniversityField
           )}
 
           {renderAcademicField(
-            <GraduationCap color="#8B5CF6" size={20} />,
+            <MaterialIcons name="school" size={20} color="#8B5CF6" />,
             "Grade",
             profile?.grade ?? null
           )}
 
           {renderAcademicField(
-            <BookOpen color="#EF4444" size={20} />,
+            <MaterialIcons name="book" size={20} color="#EF4444" />,
             "Major",
             profile?.major ?? null
           )}

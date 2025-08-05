@@ -3,6 +3,8 @@ import { presenceService } from "@/services/presenceService";
 import { StorageService } from "@/services/storageService";
 import { AuthError, Session, User } from "@supabase/supabase-js";
 import { makeRedirectUri } from "expo-auth-session";
+import * as QueryParams from "expo-auth-session/build/QueryParams";
+import * as Linking from "expo-linking";
 import * as WebBrowser from "expo-web-browser";
 import React, { createContext, useContext, useEffect, useState } from "react";
 
@@ -85,7 +87,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log("🚀 Starting user registration...");
 
       // Get redirect URL for email verification
-      const redirectTo = makeRedirectUri();
+      // Force custom scheme even in development for email verification
+      const redirectTo = "com.glevi.slakr-ai://";
+
       console.log("📧 Email verification will redirect to:", redirectTo);
 
       // First, create the user account
@@ -340,6 +344,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return { error: error as AuthError };
     }
   };
+
+  const createSessionFromUrl = async (url: string) => {
+    const { params, errorCode } = QueryParams.getQueryParams(url);
+    if (errorCode) throw new Error(errorCode);
+    const { access_token, refresh_token } = params;
+    if (!access_token) return;
+    const { data, error } = await supabase.auth.setSession({
+      access_token,
+      refresh_token,
+    });
+    if (error) throw error;
+    return data.session;
+  };
+
+  const url = Linking.useURL();
+  useEffect(() => {
+    if (url) {
+      createSessionFromUrl(url).then((session) => {
+        if (session) {
+          setSession(session);
+          setUser(session.user ?? null);
+          setLoading(false);
+          console.log("✅ Session created from deep link");
+        }
+      });
+    }
+  }, [url]);
 
   const value = {
     user,

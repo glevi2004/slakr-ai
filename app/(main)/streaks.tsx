@@ -1,28 +1,22 @@
-import React, { useState, useEffect, useMemo } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-} from "react-native";
-import {
-  ArrowLeft,
-  ArrowRight,
-  Clock,
-  TrendingUp,
-  Award,
-} from "lucide-react-native";
-import dayjs from "dayjs";
-import { useFocusEffect } from "@react-navigation/native";
 import { AppBackground } from "@/components/AppBackground";
-import { useAuth } from "@/contexts/AuthContext";
-import { StreakService } from "@/services/streakService";
 import LoadingIndicator from "@/components/LoadingIndicator";
+import CalendarGrid from "@/components/streaks/CalendarGrid";
 import Hero from "@/components/streaks/Hero";
 import StatsChip from "@/components/streaks/StatsChip";
-import CalendarGrid from "@/components/streaks/CalendarGrid";
+import { useAuth } from "@/contexts/AuthContext";
 import { DailyStatsService } from "@/services/dailyStatsService";
+import { StreakService } from "@/services/streakService";
+import { Feather, MaterialIcons } from "@expo/vector-icons";
+import { useFocusEffect } from "@react-navigation/native";
+import dayjs from "dayjs";
+import React, { useEffect, useMemo, useState } from "react";
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 const months = [
   "January",
@@ -214,21 +208,24 @@ export default function StreaksPage() {
         {/* Stats Strip */}
         <View style={styles.statsContainer}>
           <StatsChip
-            icon={Clock}
+            icon={MaterialIcons}
+            iconName="access-time"
             iconColor="#3B82F6"
             label="Total Minutes"
             value={streakStats.totalMinutes}
             suffix="m"
           />
           <StatsChip
-            icon={TrendingUp}
+            icon={MaterialIcons}
+            iconName="trending-up"
             iconColor="#10B981"
             label="Avg/Day"
             value={avgMinutesPerDay}
             suffix="m"
           />
           <StatsChip
-            icon={Award}
+            icon={MaterialIcons}
+            iconName="stars"
             iconColor="#F59E0B"
             label="Best Streak"
             value={streakStats.longestStreak}
@@ -238,7 +235,7 @@ export default function StreaksPage() {
         {/* Month Selector */}
         <View style={styles.monthSelector}>
           <TouchableOpacity onPress={handlePrevMonth} style={styles.monthArrow}>
-            <ArrowLeft color="#FFFFFF" size={24} />
+            <Feather name="arrow-left" size={24} color="#FFFFFF" />
           </TouchableOpacity>
 
           <Text style={[styles.monthText, { color: "#FFFFFF" }]}>
@@ -246,7 +243,7 @@ export default function StreaksPage() {
           </Text>
 
           <TouchableOpacity onPress={handleNextMonth} style={styles.monthArrow}>
-            <ArrowRight color="#FFFFFF" size={24} />
+            <Feather name="arrow-right" size={24} color="#FFFFFF" />
           </TouchableOpacity>
         </View>
 

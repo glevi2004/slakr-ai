@@ -5,10 +5,10 @@ export const crossPlatformStorage = {
     try {
       if (typeof localStorage !== "undefined") {
         const value = localStorage.getItem(key);
-        console.log(
-          `✅ localStorage.getItem(${key}):`,
-          value ? "found" : "null"
-        );
+        // console.log(
+        //   `✅ localStorage.getItem(${key}):`,
+        //   value ? "found" : "null"
+        // );
         return value;
       }
     } catch (error) {
@@ -23,7 +23,7 @@ export const crossPlatformStorage = {
       const AsyncStorage =
         require("@react-native-async-storage/async-storage").default;
       const value = await AsyncStorage.getItem(key);
-      console.log(`✅ AsyncStorage.getItem(${key}):`, value ? "found" : "null");
+      // console.log(`✅ AsyncStorage.getItem(${key}):`, value ? "found" : "null");
       return value;
     } catch (error) {
       console.error(
