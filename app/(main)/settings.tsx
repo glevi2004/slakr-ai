@@ -1,6 +1,5 @@
 import { AppBackground } from "@/components/AppBackground";
 import GradeDropdown from "@/components/GradeDropdown";
-import LoadingIndicator from "@/components/LoadingIndicator";
 import MajorDropdown from "@/components/MajorDropdown";
 import UniversityDropdown from "@/components/UniversityDropdown";
 import { useAuth } from "@/contexts/AuthContext";
@@ -364,21 +363,21 @@ export default function SettingsPage() {
     }
   };
 
-  const handleBugReports = async () => {
-    try {
-      await Linking.openURL("https://slakr.featurebase.app/");
-    } catch (error) {
-      Alert.alert("Error", "Could not open bug reports page");
-    }
-  };
+  // const handleBugReports = async () => {
+  //   try {
+  //     await Linking.openURL("https://slakr.featurebase.app/");
+  //   } catch (error) {
+  //     Alert.alert("Error", "Could not open bug reports page");
+  //   }
+  // };
 
-  if (loading && !profile) {
-    return (
-      <AppBackground>
-        <LoadingIndicator text="Loading settings..." />
-      </AppBackground>
-    );
-  }
+  // if (loading && !profile) {
+  //   return (
+  //     <AppBackground>
+  //       <LoadingIndicator text="Loading settings..." />
+  //     </AppBackground>
+  //   );
+  // }
 
   return (
     <AppBackground>
@@ -595,7 +594,7 @@ export default function SettingsPage() {
             <Text style={styles.settingValue}>Suggest new features</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
+          {/* <TouchableOpacity
             style={styles.settingRow}
             onPress={handleBugReports}
           >
@@ -604,7 +603,7 @@ export default function SettingsPage() {
               <Text style={styles.settingLabel}>Bug Problems</Text>
             </View>
             <Text style={styles.settingValue}>Report issues</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
 
         <View style={styles.bottomSpacer} />
