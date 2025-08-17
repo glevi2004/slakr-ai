@@ -1,7 +1,7 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useEffect, useRef, useState } from "react";
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { MIN_SESH_TIME } from "../constants/Timer";
 import { useAuth } from "../contexts/AuthContext";
 import { useTimer } from "../hooks/useTimer";
@@ -191,37 +191,7 @@ export default function Timer() {
     }
   };
 
-  const confirmStopTimer = (seconds: number): Promise<boolean> => {
-    return new Promise((resolve) => {
-      if (seconds < MIN_SESH_TIME) {
-        Alert.alert(
-          "End Session Early?",
-          "This session is less than 5 minutes and won't count towards your streaks. Are you sure you want to end it?",
-          [
-            {
-              text: "Cancel",
-              style: "cancel",
-              onPress: () => resolve(false),
-            },
-            {
-              text: "End Session",
-              style: "destructive",
-              onPress: () => resolve(true),
-            },
-          ]
-        );
-      } else {
-        resolve(true);
-      }
-    });
-  };
-
   const handleStop = async () => {
-    const currentSeconds = getCurrentSeconds();
-    const shouldStop = await confirmStopTimer(currentSeconds);
-
-    if (!shouldStop) return;
-
     if (timerMode === "session") {
       await stopSession();
     } else {
@@ -229,6 +199,7 @@ export default function Timer() {
       setSeconds(0);
 
       // Only update streaks if session meets minimum time
+      const currentSeconds = getCurrentSeconds();
       if (currentSeconds >= MIN_SESH_TIME && userId) {
         await StreakService.updateUserStreaks(userId, currentSeconds);
       }

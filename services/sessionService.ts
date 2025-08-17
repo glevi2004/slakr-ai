@@ -1,7 +1,8 @@
+import { MIN_SESH_TIME } from "../constants/Timer";
 import { supabase } from "../lib/supabase";
-import { StreakService } from "./streakService";
 import { DailyStatsService } from "./dailyStatsService";
 import { presenceService } from "./presenceService";
+import { StreakService } from "./streakService";
 
 export interface StudySession {
   id: string;
@@ -16,175 +17,101 @@ export interface StudySession {
 
 export class SessionService {
   /**
-   * Create a new study session
+   * Create a new study session (only for completed sessions)
    */
-  static async createSession(userId: string): Promise<StudySession | null> {
+  static async createCompletedSession(
+    userId: string,
+    durationSeconds: number,
+    startedAt: string
+  ): Promise<StudySession | null> {
     try {
       const { data, error } = await supabase
         .from("study_sessions")
         .insert({
           user_id: userId,
-          status: "active",
-          duration_seconds: 0,
+          status: "completed",
+          duration_seconds: durationSeconds,
+          started_at: startedAt,
+          ended_at: new Date().toISOString(),
         })
         .select()
         .single();
 
       if (error) {
-        console.error("Error creating session:", error);
+        console.error("Error creating completed session:", error);
         return null;
       }
 
-      // Set studying presence status
-      await presenceService.setStudyingStatus(true);
-
       return data;
     } catch (error) {
-      console.error("Error creating session:", error);
+      console.error("Error creating completed session:", error);
       return null;
     }
   }
 
   /**
-   * Update session duration
+   * Start studying mode (only updates presence, no database session)
    */
-  static async updateSessionDuration(
-    sessionId: string,
-    durationSeconds: number
-  ): Promise<boolean> {
+  static async startStudyingMode(userId: string): Promise<boolean> {
     try {
-      const { error } = await supabase
-        .from("study_sessions")
-        .update({
-          duration_seconds: durationSeconds,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", sessionId);
-
-      if (error) {
-        console.error("Error updating session duration:", error);
-        return false;
-      }
-
-      return true;
-    } catch (error) {
-      console.error("Error updating session duration:", error);
-      return false;
-    }
-  }
-
-  /**
-   * Pause a session
-   */
-  static async pauseSession(sessionId: string): Promise<boolean> {
-    try {
-      const { error } = await supabase
-        .from("study_sessions")
-        .update({
-          status: "paused",
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", sessionId);
-
-      if (error) {
-        console.error("Error pausing session:", error);
-        return false;
-      }
-
-      // Set presence to online when paused
-      await presenceService.setStudyingStatus(false);
-
-      return true;
-    } catch (error) {
-      console.error("Error pausing session:", error);
-      return false;
-    }
-  }
-
-  /**
-   * Resume a session
-   */
-  static async resumeSession(sessionId: string): Promise<boolean> {
-    try {
-      const { error } = await supabase
-        .from("study_sessions")
-        .update({
-          status: "active",
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", sessionId);
-
-      if (error) {
-        console.error("Error resuming session:", error);
-        return false;
-      }
-
-      // Set presence to studying when resumed
+      // Only set studying presence status
       await presenceService.setStudyingStatus(true);
-
       return true;
     } catch (error) {
-      console.error("Error resuming session:", error);
+      console.error("Error starting studying mode:", error);
       return false;
     }
   }
+
+  // These methods are no longer needed since we don't create sessions until completion
 
   /**
    * Complete a session and update related stats
    */
   static async completeSession(
-    sessionId: string,
-    finalDuration: number
+    userId: string,
+    finalDuration: number,
+    sessionStartTime: string
   ): Promise<boolean> {
     try {
       console.log(
-        "🏁 Completing session:",
-        sessionId,
-        "Duration:",
-        finalDuration
+        "🏁 Completing session - Duration:",
+        finalDuration,
+        "seconds"
       );
 
-      // First get the session to get user_id and date
-      const session = await this.getSession(sessionId);
-      if (!session) {
-        console.error("❌ Session not found:", sessionId);
-        return false;
-      }
+      // Only create session in database if it meets minimum time
+      if (finalDuration >= MIN_SESH_TIME) {
+        console.log(
+          "📊 Session meets minimum time, creating database record..."
+        );
 
-      // Update the session status
-      const { error: sessionError } = await supabase
-        .from("study_sessions")
-        .update({
-          status: "completed",
-          duration_seconds: finalDuration,
-          ended_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", sessionId);
+        // Create the completed session
+        const session = await this.createCompletedSession(
+          userId,
+          finalDuration,
+          sessionStartTime
+        );
 
-      if (sessionError) {
-        console.error("❌ Error completing session:", sessionError);
-        return false;
-      }
+        if (!session) {
+          console.error("❌ Failed to create completed session");
+          return false;
+        }
 
-      console.log("✅ Session completed successfully");
+        console.log("✅ Session created successfully");
 
-      // Extract date from session start time
-      const sessionDate = session.started_at.split("T")[0]; // YYYY-MM-DD
-
-      // Update daily stats (only if session is meaningful - 30+ seconds)
-      if (finalDuration >= 30) {
-        console.log("📊 Updating daily stats and streaks...");
+        // Extract date from session start time
+        const sessionDate = sessionStartTime.split("T")[0]; // YYYY-MM-DD
 
         // Update daily stats and streaks in parallel
         const [dailyStatsResult, streakResult] = await Promise.all([
           DailyStatsService.updateDailyStats(
-            session.user_id,
+            userId,
             sessionDate,
             finalDuration,
             1
           ),
-          StreakService.updateUserStreaks(session.user_id, finalDuration),
+          StreakService.updateUserStreaks(userId, finalDuration),
         ]);
 
         if (!dailyStatsResult) {
@@ -201,7 +128,11 @@ export class SessionService {
 
         console.log("✅ All stats updated successfully");
       } else {
-        console.log("⏱️ Session too short (<30s), skipping stats update");
+        console.log(
+          `⏱️ Session too short (<${
+            MIN_SESH_TIME / 60
+          } minutes), skipping database creation and stats update`
+        );
       }
 
       // Reset presence status to online after completing study session
