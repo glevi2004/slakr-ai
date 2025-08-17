@@ -201,7 +201,11 @@ export default function Timer() {
       // Only update streaks if session meets minimum time
       const currentSeconds = getCurrentSeconds();
       if (currentSeconds >= MIN_SESH_TIME && userId) {
-        await StreakService.updateUserStreaks(userId, currentSeconds);
+        console.log("🔄 Timer component updating streaks directly");
+        const streakResult = await StreakService.updateUserStreaks(userId, currentSeconds);
+        if (streakResult) {
+          await StreakService.validateStreakData(userId);
+        }
       }
     }
   };

@@ -103,16 +103,13 @@ export class SessionService {
         // Extract date from session start time
         const sessionDate = sessionStartTime.split("T")[0]; // YYYY-MM-DD
 
-        // Update daily stats and streaks in parallel
-        const [dailyStatsResult, streakResult] = await Promise.all([
-          DailyStatsService.updateDailyStats(
-            userId,
-            sessionDate,
-            finalDuration,
-            1
-          ),
-          StreakService.updateUserStreaks(userId, finalDuration),
-        ]);
+        // Update daily stats first
+        const dailyStatsResult = await DailyStatsService.updateDailyStats(
+          userId,
+          sessionDate,
+          finalDuration,
+          1
+        );
 
         if (!dailyStatsResult) {
           console.warn(
@@ -120,10 +117,19 @@ export class SessionService {
           );
         }
 
+        // Update streaks after daily stats to avoid race conditions
+        const streakResult = await StreakService.updateUserStreaks(
+          userId,
+          finalDuration
+        );
+
         if (!streakResult) {
           console.warn(
             "⚠️ Failed to update streaks, but session was completed"
           );
+        } else {
+          // Validate streak data integrity after update
+          await StreakService.validateStreakData(userId);
         }
 
         console.log("✅ All stats updated successfully");
