@@ -163,6 +163,17 @@ export class StreakService {
   }
 
   /**
+   * Check if two dates are consecutive days
+   */
+  private static isConsecutiveDay(lastDate: string, today: string): boolean {
+    const last = new Date(lastDate + "T00:00:00Z");
+    const current = new Date(today + "T00:00:00Z");
+    const diffTime = current.getTime() - last.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays === 1;
+  }
+
+  /**
    * Calculate streak updates based on session dates
    */
   static calculateStreakUpdate(
@@ -190,19 +201,12 @@ export class StreakService {
       console.log("🎉 First session ever!");
       newCurrentStreak = 1;
     } else {
-      const lastDate = new Date(lastSessionDate);
-      const todayDate = new Date(today);
-      const daysDifference = Math.floor(
-        (todayDate.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24)
-      );
-
-      console.log("📆 Days difference:", daysDifference);
-
-      if (daysDifference === 0) {
+      // Use direct string comparison for same day check
+      if (lastSessionDate === today) {
         // Same day - maintain current streak
         console.log("📅 Same day - streak continues");
         newCurrentStreak = currentStreak;
-      } else if (daysDifference === 1) {
+      } else if (this.isConsecutiveDay(lastSessionDate, today)) {
         // Next day, streak continues
         console.log("➡️ Next day - streak increases!");
         newCurrentStreak = currentStreak + 1;
