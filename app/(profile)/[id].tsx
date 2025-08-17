@@ -58,7 +58,7 @@ export default function FriendProfilePage() {
   }, [id, user?.id]);
 
   const userLevel = getUserLevel(
-    Math.ceil((streakData?.total_study_time_seconds || 0) / 60)
+    Math.round((streakData?.total_study_time_seconds || 0) / 60)
   );
 
   const formatTime = (minutes: number): string => {

@@ -78,7 +78,7 @@ export default function StreaksPage() {
 
         if (userStreaks) {
           setStreakStats({
-            totalMinutes: Math.ceil(userStreaks.total_study_time_seconds / 60),
+            totalMinutes: Math.round(userStreaks.total_study_time_seconds / 60),
             currentStreak: userStreaks.current_streak,
             longestStreak: userStreaks.longest_streak,
           });

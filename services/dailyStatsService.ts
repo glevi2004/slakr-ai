@@ -169,7 +169,7 @@ export class DailyStatsService {
       // Convert to the format expected by the calendar (date -> minutes)
       const result: { [key: string]: number } = {};
       data.forEach((stat) => {
-        const minutes = Math.floor(stat.total_study_time_seconds / 60);
+        const minutes = Math.round(stat.total_study_time_seconds / 60);
         result[stat.date] = minutes;
       });
 

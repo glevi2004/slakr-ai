@@ -188,7 +188,7 @@ export default function ProfilePage() {
   }
 
   const userLevel = getUserLevel(
-    Math.ceil((streakData?.total_study_time_seconds || 0) / 60)
+    Math.round((streakData?.total_study_time_seconds || 0) / 60)
   );
 
   return (

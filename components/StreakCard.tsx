@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import React, { useEffect, useState } from "react";
+import { StyleSheet, Text, View } from "react-native";
 import { useAuth } from "../contexts/AuthContext";
-import { StreakService, UserStreak } from "../services/streakService";
 import { useTimer } from "../hooks/useTimer";
+import { StreakService } from "../services/streakService";
 
 export default function StreakCard() {
   const { user } = useAuth();
@@ -31,7 +31,7 @@ export default function StreakCard() {
   }, [user?.id, refreshStreaks]);
 
   const formatTotalTime = (seconds: number) => {
-    const totalMinutes = Math.ceil(seconds / 60);
+    const totalMinutes = Math.round(seconds / 60);
 
     if (totalMinutes < 60) {
       return `${totalMinutes}m`;

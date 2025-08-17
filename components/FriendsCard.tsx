@@ -132,7 +132,7 @@ export default function FriendsCard() {
                     friend.full_name || friend.username
                   )}&background=E94131&color=fff&size=128`,
                 streak: streakData?.current_streak || 0,
-                totalMinutes: Math.floor(
+                totalMinutes: Math.round(
                   (streakData?.total_study_time_seconds || 0) / 60
                 ),
                 isOnline,
