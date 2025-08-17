@@ -39,37 +39,75 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
+    let mounted = true;
 
-      // Initialize presence if user is logged in
-      if (session?.user?.id) {
-        presenceService.initialize(session.user.id);
+    const initializeAuth = async () => {
+      try {
+        console.log("🔄 Initializing auth state...");
+        // Get initial session
+        const {
+          data: { session },
+          error,
+        } = await supabase.auth.getSession();
+
+        if (error) {
+          console.error("❌ Error getting initial session:", error);
+          if (mounted) {
+            setLoading(false);
+          }
+          return;
+        }
+
+        if (mounted) {
+          setSession(session);
+          setUser(session?.user ?? null);
+          setLoading(false);
+
+          // Initialize presence if user is logged in
+          if (session?.user?.id) {
+            console.log("✅ User found, initializing presence...");
+            presenceService.initialize(session.user.id);
+          } else {
+            console.log("ℹ️ No user found in initial session");
+          }
+        }
+      } catch (error) {
+        console.error("❌ Error during auth initialization:", error);
+        if (mounted) {
+          setLoading(false);
+        }
       }
-    });
+    };
+
+    initializeAuth();
 
     // Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
+      if (mounted) {
+        console.log(
+          "🔄 Auth state changed:",
+          _event,
+          session?.user?.id ? "user logged in" : "user logged out"
+        );
+        setSession(session);
+        setUser(session?.user ?? null);
+        setLoading(false);
 
-      // Handle presence service based on auth state
-      if (session?.user?.id) {
-        // User signed in, initialize presence
-        await presenceService.initialize(session.user.id);
-      } else {
-        // User signed out, cleanup presence
-        await presenceService.cleanup();
+        // Handle presence service based on auth state
+        if (session?.user?.id) {
+          // User signed in, initialize presence
+          await presenceService.initialize(session.user.id);
+        } else {
+          // User signed out, cleanup presence
+          await presenceService.cleanup();
+        }
       }
     });
 
     return () => {
+      mounted = false;
       subscription.unsubscribe();
       // Cleanup presence when component unmounts
       presenceService.cleanup();

@@ -1,6 +1,5 @@
-import { supabase } from "../lib/supabase";
-import { router } from "expo-router";
 import { MIN_SESH_TIME } from "../constants/Timer";
+import { supabase } from "../lib/supabase";
 
 export interface UserStreak {
   user_id: string;
@@ -17,26 +16,19 @@ export class StreakService {
    * Handle network errors by clearing session and redirecting
    */
   private static handleNetworkError(error: any) {
-    const isNetworkError =
-      error?.message?.includes("Network request failed") ||
-      error?.message?.includes("fetch") ||
-      error?.code === "NETWORK_ERROR" ||
-      error?.name === "NetworkError";
+    // Only sign out if it's specifically an authentication error
+    const isAuthError =
+      error?.message?.includes("JWT expired") ||
+      error?.message?.includes("Invalid JWT") ||
+      error?.status === 401 ||
+      error?.status === 403;
 
-    if (isNetworkError) {
-      console.log(
-        "🔄 StreakService: Network error detected, clearing session and redirecting..."
-      );
-
-      // Clear the user session
+    if (isAuthError) {
+      console.log("🔄 Authentication error detected, signing out...");
       supabase.auth.signOut();
-
-      // Redirect to index (which will route to landing page)
-      try {
-        router.replace("/");
-      } catch (redirectError) {
-        console.error("Error redirecting:", redirectError);
-      }
+    } else {
+      console.log("🔄 Network error detected, will retry later...");
+      // Just log and continue - don't sign out for general network issues
     }
   }
   /**
