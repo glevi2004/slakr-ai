@@ -1,5 +1,6 @@
 import { MIN_SESH_TIME } from "../constants/Timer";
 import { supabase } from "../lib/supabase";
+import { eventService, STREAK_EVENTS } from "./eventService";
 
 export interface UserStreak {
   user_id: string;
@@ -194,6 +195,10 @@ export class StreakService {
       }
 
       console.log("✅ Streak updated successfully:", data);
+
+      // Emit event to notify components that streaks have been updated
+      eventService.emit(STREAK_EVENTS.STREAK_UPDATED);
+
       return data;
     } catch (error) {
       console.error("❌ Exception updating user streaks:", error);
@@ -556,6 +561,10 @@ export class StreakService {
       }
 
       console.log("✅ Streaks force refreshed successfully:", data);
+
+      // Emit event to notify components that streaks have been updated
+      eventService.emit(STREAK_EVENTS.STREAK_UPDATED);
+
       return data;
     } catch (error) {
       console.error("❌ Error force refreshing streaks:", error);

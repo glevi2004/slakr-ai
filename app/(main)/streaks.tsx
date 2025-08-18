@@ -5,6 +5,7 @@ import Hero from "@/components/streaks/Hero";
 import StatsChip from "@/components/streaks/StatsChip";
 import { useAuth } from "@/contexts/AuthContext";
 import { DailyStatsService } from "@/services/dailyStatsService";
+import { eventService, STREAK_EVENTS } from "@/services/eventService";
 import { StreakService } from "@/services/streakService";
 import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
@@ -160,6 +161,48 @@ export default function StreaksPage() {
       }
     }, [user, currentMonth])
   );
+
+  // Subscribe to streak update events
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const refreshData = async () => {
+      try {
+        // Get current month date range
+        const startDate = currentMonth.startOf("month").format("YYYY-MM-DD");
+        const endDate = currentMonth.endOf("month").format("YYYY-MM-DD");
+
+        // Load fresh streak stats and daily study data
+        const [userStreaks, dailyData] = await Promise.all([
+          StreakService.getUserStreaks(user.id),
+          StreakService.getDailyStudyData(user.id, startDate, endDate),
+        ]);
+
+        if (userStreaks) {
+          setStreakStats({
+            totalMinutes: Math.round(userStreaks.total_study_time_seconds / 60),
+            currentStreak: userStreaks.current_streak,
+            longestStreak: userStreaks.longest_streak,
+          });
+        }
+
+        setStudyData(dailyData);
+      } catch (error) {
+        console.error("Error refreshing streak data:", error);
+      }
+    };
+
+    // Subscribe to streak update events
+    const unsubscribeStreak = eventService.subscribe(
+      STREAK_EVENTS.STREAK_UPDATED,
+      refreshData
+    );
+
+    // Cleanup subscription on unmount
+    return () => {
+      unsubscribeStreak();
+    };
+  }, [user?.id, currentMonth]);
 
   const handlePrevMonth = () => {
     setCurrentMonth(currentMonth.subtract(1, "month"));

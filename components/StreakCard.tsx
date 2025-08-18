@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { useAuth } from "../contexts/AuthContext";
 import { useTimer } from "../hooks/useTimer";
+import { eventService, STREAK_EVENTS } from "../services/eventService";
 import { StreakService } from "../services/streakService";
 
 export default function StreakCard() {
@@ -22,13 +23,25 @@ export default function StreakCard() {
       }
     };
 
-    loadStudyTime();
-    refreshStreaks();
+    const refreshAllData = async () => {
+      await loadStudyTime();
+      refreshStreaks();
+    };
 
-    // Refresh study time every 30 seconds when user is viewing the page
-    const interval = setInterval(loadStudyTime, 30000);
-    return () => clearInterval(interval);
-  }, [user?.id, refreshStreaks]);
+    // Load initial data
+    refreshAllData();
+
+    // Subscribe to streak update events
+    const unsubscribeStreak = eventService.subscribe(
+      STREAK_EVENTS.STREAK_UPDATED,
+      refreshAllData
+    );
+
+    // Cleanup subscription on unmount
+    return () => {
+      unsubscribeStreak();
+    };
+  }, [user?.id]);
 
   const formatTotalTime = (seconds: number) => {
     const totalMinutes = Math.round(seconds / 60);

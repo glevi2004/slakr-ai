@@ -2,6 +2,7 @@ import { AppBackground } from "@/components/AppBackground";
 import LoadingIndicator from "@/components/LoadingIndicator";
 import { getUserLevel } from "@/constants/Levels";
 import { useAuth } from "@/contexts/AuthContext";
+import { eventService, STREAK_EVENTS } from "@/services/eventService";
 import { ProfileService, UserProfile } from "@/services/profileService";
 import { StreakService, UserStreak } from "@/services/streakService";
 import { Feather, MaterialIcons } from "@expo/vector-icons";
@@ -57,6 +58,33 @@ export default function ProfilePage() {
 
     loadData();
   }, [user]);
+
+  // Subscribe to streak update events
+  useEffect(() => {
+    if (!user?.id || !user?.email) return;
+
+    const refreshStreakData = async () => {
+      try {
+        const userStreaks = await StreakService.getUserStreaks(user.id!);
+        if (userStreaks) {
+          setStreakData(userStreaks);
+        }
+      } catch (error) {
+        console.error("Error refreshing streak data:", error);
+      }
+    };
+
+    // Subscribe to streak update events
+    const unsubscribeStreak = eventService.subscribe(
+      STREAK_EVENTS.STREAK_UPDATED,
+      refreshStreakData
+    );
+
+    // Cleanup subscription on unmount
+    return () => {
+      unsubscribeStreak();
+    };
+  }, [user?.id, user?.email]);
 
   // Refresh data when screen comes into focus (e.g., after completing a session or updating profile)
   useFocusEffect(

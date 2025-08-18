@@ -202,7 +202,10 @@ export default function Timer() {
       const currentSeconds = getCurrentSeconds();
       if (currentSeconds >= MIN_SESH_TIME && userId) {
         console.log("🔄 Timer component updating streaks directly");
-        const streakResult = await StreakService.updateUserStreaks(userId, currentSeconds);
+        const streakResult = await StreakService.updateUserStreaks(
+          userId,
+          currentSeconds
+        );
         if (streakResult) {
           await StreakService.validateStreakData(userId);
         }

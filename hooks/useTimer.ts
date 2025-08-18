@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Alert, AppState, AppStateStatus } from "react-native";
 import { MIN_SESH_TIME } from "../constants/Timer";
 import { SessionService } from "../services/sessionService";
@@ -194,7 +194,7 @@ export function useTimer(userId: string | undefined): UseTimerReturn {
     }
   };
 
-  const refreshStreaks = async () => {
+  const refreshStreaks = React.useCallback(async () => {
     if (!userId) return;
 
     try {
@@ -203,7 +203,7 @@ export function useTimer(userId: string | undefined): UseTimerReturn {
     } catch (error) {
       console.error("Error refreshing streaks:", error);
     }
-  };
+  }, [userId]);
 
   return {
     seconds,
