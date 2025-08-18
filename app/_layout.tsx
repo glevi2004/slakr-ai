@@ -12,6 +12,7 @@ import "react-native-reanimated";
 import { AuthGuard } from "@/components/AuthGuard";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { useColorScheme } from "@/hooks/useColorScheme";
+import { pushNotificationService } from "@/services/pushNotificationService";
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -62,6 +63,34 @@ export default function RootLayout() {
       }
     }
   }, [router]);
+
+  // Handle notification taps
+  useEffect(() => {
+    const subscription =
+      pushNotificationService.addNotificationResponseReceivedListener(
+        (response) => {
+          const data = response.notification.request.content.data;
+
+          if (data.type === "friend_online") {
+            // Navigate to friends page
+            console.log(
+              "User tapped friend online notification:",
+              data.friendName
+            );
+            // You can use router.push here if needed
+          } else if (data.type === "friend_request_accepted") {
+            // Navigate to friends page when friend request is accepted
+            console.log(
+              "User tapped friend request accepted notification:",
+              data.friendName
+            );
+            // You can use router.push here if needed
+          }
+        }
+      );
+
+    return () => subscription.remove();
+  }, []);
 
   if (!loaded) {
     return null;

@@ -1,5 +1,6 @@
 import { supabase } from "@/lib/supabase";
 import { presenceService } from "@/services/presenceService";
+import { pushNotificationService } from "@/services/pushNotificationService";
 import { StorageService } from "@/services/storageService";
 import { AuthError, Session, User } from "@supabase/supabase-js";
 import { makeRedirectUri } from "expo-auth-session";
@@ -63,10 +64,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setUser(session?.user ?? null);
           setLoading(false);
 
-          // Initialize presence if user is logged in
+          // Initialize presence and push notifications if user is logged in
           if (session?.user?.id) {
-            console.log("✅ User found, initializing presence...");
+            console.log(
+              "✅ User found, initializing presence and push notifications..."
+            );
             presenceService.initialize(session.user.id);
+
+            // Initialize push notifications
+            const pushToken =
+              await pushNotificationService.registerForPushNotifications();
+            if (pushToken) {
+              await pushNotificationService.savePushToken(
+                session.user.id,
+                pushToken
+              );
+            }
           } else {
             console.log("ℹ️ No user found in initial session");
           }
@@ -95,13 +108,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(session?.user ?? null);
         setLoading(false);
 
-        // Handle presence service based on auth state
+        // Handle presence service and push notifications based on auth state
         if (session?.user?.id) {
-          // User signed in, initialize presence
-          await presenceService.initialize(session.user.id);
+          // User signed in, initialize presence and push notifications
+          console.log("✅ User signed in, initializing services...");
+          presenceService.initialize(session.user.id);
+
+          // Initialize push notifications
+          const pushToken =
+            await pushNotificationService.registerForPushNotifications();
+          if (pushToken) {
+            await pushNotificationService.savePushToken(
+              session.user.id,
+              pushToken
+            );
+          }
         } else {
-          // User signed out, cleanup presence
-          await presenceService.cleanup();
+          // User signed out, cleanup services
+          console.log("ℹ️ User signed out, cleaning up services...");
+          presenceService.cleanup();
         }
       }
     });

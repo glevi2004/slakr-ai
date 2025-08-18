@@ -174,27 +174,41 @@ export default function FriendsCard() {
 
           const subscription = presenceService.subscribeToFriendsPresence(
             friendIds,
-            (payload) => {
-              const updatedProfile = payload.new;
+            async (payload) => {
+              const { old: oldRecord, new: newRecord } = payload;
+
+              // Handle UI updates
               setFriends((prevFriends) =>
                 prevFriends.map((friend) => {
-                  if (friend.id === updatedProfile.id) {
+                  if (friend.id === newRecord.id) {
                     const { isOnline, isStudying } = getOnlineStatus(
-                      updatedProfile.online_status,
-                      updatedProfile.last_seen
+                      newRecord.online_status,
+                      newRecord.last_seen
                     );
                     return {
                       ...friend,
                       isOnline,
                       isStudying,
                       currentSessionStart: isStudying
-                        ? updatedProfile.last_seen
+                        ? newRecord.last_seen
                         : undefined,
                     };
                   }
                   return friend;
                 })
               );
+
+              // Send push notification if friend came online
+              if (
+                newRecord.online_status === "online" &&
+                oldRecord.online_status !== "online"
+              ) {
+                await presenceService.handleFriendOnlineStatusChange(
+                  newRecord.id,
+                  newRecord.online_status,
+                  oldRecord.online_status
+                );
+              }
             }
           );
           setPresenceSubscription(subscription);

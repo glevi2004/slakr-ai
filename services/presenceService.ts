@@ -1,5 +1,7 @@
 import { AppState, AppStateStatus } from "react-native";
 import { supabase } from "../lib/supabase";
+import { FriendsService } from "./friendsService";
+import { pushNotificationService } from "./pushNotificationService";
 
 export type OnlineStatus = "online" | "away" | "offline" | "studying";
 
@@ -193,6 +195,53 @@ export class PresenceService {
       return await this.setOnlineStatus("studying");
     } else {
       return await this.setOnlineStatus("online");
+    }
+  }
+
+  /**
+   * Handle friend online status change and send push notifications
+   */
+  async handleFriendOnlineStatusChange(
+    userId: string,
+    newStatus: OnlineStatus,
+    oldStatus: OnlineStatus
+  ): Promise<void> {
+    // Only send notifications when someone comes online
+    if (newStatus === "online" && oldStatus !== "online") {
+      try {
+        // Get user's profile to get their name
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("full_name")
+          .eq("id", userId)
+          .single();
+
+        if (!profile?.full_name) return;
+
+        // Get all friends of this user
+        const friends = await FriendsService.getFriends(userId);
+        if (!friends || friends.length === 0) return;
+
+        // Get push tokens for all friends
+        const friendIds = friends.map((friend) => friend.id);
+        const pushTokens = await pushNotificationService.getPushTokens(
+          friendIds
+        );
+
+        // Send notifications to all friends
+        const notificationPromises = Object.entries(pushTokens).map(
+          ([friendId, pushToken]) =>
+            pushNotificationService.sendFriendOnlineNotification(
+              profile.full_name,
+              pushToken
+            )
+        );
+
+        await Promise.all(notificationPromises);
+        console.log(`✅ Sent online notifications for ${profile.full_name}`);
+      } catch (error) {
+        console.error("Error sending friend online notifications:", error);
+      }
     }
   }
 
