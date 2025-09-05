@@ -242,7 +242,7 @@ export default function StreaksPage() {
       >
         {/* Header */}
         <View style={styles.header}>
-          <Text style={[styles.headerTitle, { color: "#FFFFFF" }]}>Streak</Text>
+          <Text style={[styles.headerTitle, { color: "#333333" }]}>Streak</Text>
         </View>
 
         {/* Hero Section */}
@@ -278,15 +278,15 @@ export default function StreaksPage() {
         {/* Month Selector */}
         <View style={styles.monthSelector}>
           <TouchableOpacity onPress={handlePrevMonth} style={styles.monthArrow}>
-            <Feather name="arrow-left" size={24} color="#FFFFFF" />
+            <Feather name="arrow-left" size={24} color="#333333" />
           </TouchableOpacity>
 
-          <Text style={[styles.monthText, { color: "#FFFFFF" }]}>
+          <Text style={[styles.monthText, { color: "#333333" }]}>
             {months[currentMonth.month()]} {currentMonth.year()}
           </Text>
 
           <TouchableOpacity onPress={handleNextMonth} style={styles.monthArrow}>
-            <Feather name="arrow-right" size={24} color="#FFFFFF" />
+            <Feather name="arrow-right" size={24} color="#333333" />
           </TouchableOpacity>
         </View>
 

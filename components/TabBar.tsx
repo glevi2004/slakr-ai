@@ -1,7 +1,7 @@
+import { HapticTab } from "@/components/HapticTab";
+import { Tabs } from "expo-router";
 import React from "react";
 import { StyleSheet } from "react-native";
-import { Tabs } from "expo-router";
-import { HapticTab } from "@/components/HapticTab";
 
 const ACTIVE_COLOR = "#FFFFFF";
 const INACTIVE_COLOR = "#666666";
@@ -69,4 +69,4 @@ export const tabBarScreenOptions = {
   tabBarButton: HapticTab,
 };
 
-export { ACTIVE_COLOR, INACTIVE_COLOR, BACKGROUND_COLOR };
+export { ACTIVE_COLOR, BACKGROUND_COLOR, INACTIVE_COLOR };

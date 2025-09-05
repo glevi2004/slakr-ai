@@ -1,14 +1,14 @@
+import dayjs from "dayjs";
 import React, { useState } from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
   Dimensions,
-  TouchableOpacity,
+  FlatList,
   Modal,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import dayjs from "dayjs";
 
 const { width } = Dimensions.get("window");
 // Account for: marginHorizontal (32) + padding (40) + day cell margins (28 = 4px between 7 cells)
@@ -169,19 +169,19 @@ export default function CalendarGrid({
   const getHeatMapStyle = (intensity: number) => {
     switch (intensity) {
       case 0:
-        return { backgroundColor: "#2B2B2B" }; // None - grid background
+        return { backgroundColor: "rgba(0, 0, 0, 0.05)" }; // None - grid background
       case 1:
-        return { backgroundColor: "#442100" }; // Spark (1-29 min)
+        return { backgroundColor: "rgba(233, 65, 49, 0.2)" }; // Spark (1-29 min)
       case 2:
-        return { backgroundColor: "#8C3700" }; // Ember (30-59 min)
+        return { backgroundColor: "rgba(233, 65, 49, 0.4)" }; // Ember (30-59 min)
       case 3:
-        return { backgroundColor: "#FF5400" }; // Flame (60-119 min)
+        return { backgroundColor: "rgba(233, 65, 49, 0.6)" }; // Flame (60-119 min)
       case 4:
-        return { backgroundColor: "#FF7E2D" }; // Blaze (120-239 min)
+        return { backgroundColor: "rgba(233, 65, 49, 0.8)" }; // Blaze (120-239 min)
       case 5:
-        return { backgroundColor: "#FFB84C" }; // Inferno (240+ min)
+        return { backgroundColor: "#E94131" }; // Inferno (240+ min)
       default:
-        return { backgroundColor: "#2B2B2B" };
+        return { backgroundColor: "rgba(0, 0, 0, 0.05)" };
     }
   };
 
@@ -191,12 +191,7 @@ export default function CalendarGrid({
         <View style={styles.daysOfWeek}>
           {DAYS_OF_WEEK.map((day, index) => (
             <View key={index} style={styles.dayOfWeekCell}>
-              <Text
-                style={[
-                  styles.dayOfWeekText,
-                  { color: "rgba(255, 255, 255, 0.6)" },
-                ]}
-              >
+              <Text style={[styles.dayOfWeekText, { color: "#666666" }]}>
                 {day}
               </Text>
             </View>
@@ -212,8 +207,8 @@ export default function CalendarGrid({
         style={[
           styles.container,
           {
-            backgroundColor: "#1A1A1A",
-            borderColor: "rgba(255, 255, 255, 0.1)",
+            backgroundColor: "rgba(248, 248, 248, 0.8)",
+            borderColor: "rgba(0, 0, 0, 0.1)",
           },
         ]}
       >
@@ -273,6 +268,11 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     borderWidth: 1,
     overflow: "hidden",
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
   },
   content: {
     padding: 20,
@@ -310,7 +310,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     position: "relative",
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    backgroundColor: "rgba(0, 0, 0, 0.05)",
   },
   earnedDay: {
     backgroundColor: "rgba(16, 185, 129, 0.2)",
@@ -319,7 +319,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(239, 68, 68, 0.1)",
   },
   futureDay: {
-    backgroundColor: "rgba(255, 255, 255, 0.02)",
+    backgroundColor: "rgba(0, 0, 0, 0.02)",
   },
   todayBorder: {
     borderWidth: 2,
@@ -328,16 +328,16 @@ const styles = StyleSheet.create({
   dayText: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#FFFFFF",
+    color: "#333333",
   },
   earnedText: {
     color: "#10B981",
   },
   missedText: {
-    color: "rgba(255, 255, 255, 0.4)",
+    color: "#999999",
   },
   futureText: {
-    color: "rgba(255, 255, 255, 0.3)",
+    color: "#CCCCCC",
   },
   todayText: {
     color: "#3B82F6",
@@ -361,23 +361,23 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   modalContent: {
-    backgroundColor: "#1A1A1A",
+    backgroundColor: "rgba(248, 248, 248, 0.95)",
     borderRadius: 16,
     padding: 24,
     alignItems: "center",
     marginHorizontal: 32,
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.1)",
+    borderColor: "rgba(0, 0, 0, 0.1)",
   },
   modalTitle: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#FFFFFF",
+    color: "#333333",
     marginBottom: 8,
   },
   modalMinutes: {
     fontSize: 16,
-    color: "rgba(255, 255, 255, 0.8)",
+    color: "#666666",
     marginBottom: 16,
   },
   modalCloseButton: {

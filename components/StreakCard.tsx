@@ -85,12 +85,7 @@ export default function StreakCard() {
 
   return (
     <View style={styles.streakCard}>
-      <LinearGradient
-        colors={["rgba(233, 65, 49, 0.15)", "rgba(233, 65, 49, 0.05)"]}
-        style={styles.streakGradient}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-      >
+      <View style={styles.streakGradient}>
         <View style={styles.streakIconContainer}>
           <LinearGradient
             colors={["#E94131", "#FF7E33"]}
@@ -115,7 +110,7 @@ export default function StreakCard() {
             </Text>
           )}
         </View>
-      </LinearGradient>
+      </View>
     </View>
   );
 }
@@ -132,8 +127,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 16,
     borderWidth: 1,
-    borderColor: "rgba(233, 65, 49, 0.2)",
+    borderColor: "#E0E0E0",
     borderRadius: 16,
+    backgroundColor: "#F9F9F9",
   },
   streakIconContainer: {
     marginRight: 12,
@@ -151,12 +147,12 @@ const styles = StyleSheet.create({
   streakCount: {
     fontSize: 16,
     fontWeight: "700",
-    color: "#FFFFFF",
+    color: "#333333",
     marginBottom: 2,
   },
   streakTime: {
     fontSize: 13,
-    color: "#9DA4AE",
+    color: "#666666",
     marginBottom: 8,
   },
   streakStats: {
@@ -164,11 +160,11 @@ const styles = StyleSheet.create({
   },
   totalTimeText: {
     fontSize: 12,
-    color: "#9DA4AE",
+    color: "#666666",
     marginBottom: 2,
   },
   longestStreakText: {
     fontSize: 11,
-    color: "#707070",
+    color: "#888888",
   },
 });

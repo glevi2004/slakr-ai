@@ -31,7 +31,7 @@ export default function MainHomePage() {
           style={styles.topNotificationButton}
           onPress={handleNotificationsPress}
         >
-          <Feather name="bell" size={24} color="#FFFFFF" />
+          <Feather name="bell" size={24} color="#333333" />
         </TouchableOpacity>
 
         <ScrollView
@@ -71,7 +71,7 @@ export default function MainHomePage() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#000000",
+    backgroundColor: "#FFFFFF",
   },
   container: {
     flex: 1,
@@ -90,18 +90,18 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: "#1A1A1A",
+    backgroundColor: "#F5F5F5",
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "#2D2D2D",
+    borderColor: "#E0E0E0",
     zIndex: 1000,
     shadowColor: "#000000",
     shadowOffset: {
       width: 0,
       height: 2,
     },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.1,
     shadowRadius: 3.84,
     elevation: 5,
   },

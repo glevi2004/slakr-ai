@@ -1,21 +1,14 @@
-import React from "react";
-import { View, Text, StyleSheet } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import React from "react";
+import { StyleSheet, Text, View } from "react-native";
 
 interface HeroProps {
   currentStreak: number;
 }
 
 export default function Hero({ currentStreak }: HeroProps) {
-  const gradientColors: [string, string] = ["#1A1A1A", "#2D2D2D"];
-
   return (
-    <LinearGradient
-      colors={gradientColors}
-      style={styles.container}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-    >
+    <View style={styles.container}>
       <View style={styles.content}>
         {/* Ash Character Placeholder */}
         <View style={styles.ashContainer}>
@@ -31,12 +24,10 @@ export default function Hero({ currentStreak }: HeroProps) {
 
         {/* Streak Counter */}
         <View style={styles.counterContainer}>
-          <Text style={[styles.streakNumber, { color: "#FFFFFF" }]}>
+          <Text style={[styles.streakNumber, { color: "#333333" }]}>
             {currentStreak}
           </Text>
-          <Text
-            style={[styles.streakLabel, { color: "rgba(255, 255, 255, 0.8)" }]}
-          >
+          <Text style={[styles.streakLabel, { color: "#666666" }]}>
             day streak!
           </Text>
         </View>
@@ -48,25 +39,25 @@ export default function Hero({ currentStreak }: HeroProps) {
           style={[
             styles.floatingElement,
             styles.element1,
-            { backgroundColor: "rgba(255, 255, 255, 0.1)" },
+            { backgroundColor: "rgba(0, 0, 0, 0.05)" },
           ]}
         />
         <View
           style={[
             styles.floatingElement,
             styles.element2,
-            { backgroundColor: "rgba(255, 255, 255, 0.1)" },
+            { backgroundColor: "rgba(0, 0, 0, 0.05)" },
           ]}
         />
         <View
           style={[
             styles.floatingElement,
             styles.element3,
-            { backgroundColor: "rgba(255, 255, 255, 0.1)" },
+            { backgroundColor: "rgba(0, 0, 0, 0.05)" },
           ]}
         />
       </View>
-    </LinearGradient>
+    </View>
   );
 }
 
@@ -78,6 +69,14 @@ const styles = StyleSheet.create({
     marginTop: 16,
     overflow: "hidden",
     position: "relative",
+    backgroundColor: "rgba(248, 248, 248, 0.8)",
+    borderWidth: 1,
+    borderColor: "rgba(0, 0, 0, 0.1)",
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
   },
   content: {
     flex: 1,

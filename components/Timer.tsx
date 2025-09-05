@@ -535,12 +535,12 @@ export default function Timer() {
 
 const styles = StyleSheet.create({
   sessionCard: {
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    backgroundColor: "#F9F9F9",
     borderRadius: 16,
     padding: 20,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: "#2D2D2D",
+    borderColor: "#E0E0E0",
   },
   sessionCardExpanded: {
     paddingBottom: 30,
@@ -554,12 +554,12 @@ const styles = StyleSheet.create({
   sessionTitle: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#FFFFFF",
+    color: "#333333",
   },
   timerDisplay: {
     fontSize: 48,
     fontWeight: "700",
-    color: "#FFFFFF",
+    color: "#333333",
     textAlign: "center",
     marginBottom: 16,
   },
@@ -568,7 +568,7 @@ const styles = StyleSheet.create({
   },
   progressBar: {
     height: 6,
-    backgroundColor: "#2D2D2D",
+    backgroundColor: "#E0E0E0",
     borderRadius: 3,
     marginBottom: 8,
   },
@@ -579,7 +579,7 @@ const styles = StyleSheet.create({
   },
   progressText: {
     fontSize: 14,
-    color: "#9DA4AE",
+    color: "#666666",
     textAlign: "right",
   },
   sessionControls: {
@@ -590,14 +590,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#2D2D2D",
+    backgroundColor: "#F0F0F0",
     borderRadius: 12,
     paddingVertical: 12,
     paddingHorizontal: 16,
     flex: 1,
     marginHorizontal: 4,
     borderWidth: 1,
-    borderColor: "#3A3A3A",
+    borderColor: "#D0D0D0",
   },
   sessionStartButton: {
     backgroundColor: "transparent",
@@ -610,7 +610,7 @@ const styles = StyleSheet.create({
   sessionButtonText: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#FFFFFF",
+    color: "#333333",
     marginLeft: 8,
   },
   buttonGradient: {
@@ -625,7 +625,7 @@ const styles = StyleSheet.create({
   // Mode Selector Styles
   modeSelector: {
     flexDirection: "row",
-    backgroundColor: "#2D2D2D",
+    backgroundColor: "#F0F0F0",
     borderRadius: 12,
     padding: 4,
     marginBottom: 20,
@@ -640,12 +640,12 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   modeButtonActive: {
-    backgroundColor: "#1A1A1A",
+    backgroundColor: "#FFFFFF",
   },
   modeButtonText: {
     fontSize: 12,
     fontWeight: "500",
-    color: "#9DA4AE",
+    color: "#666666",
     marginLeft: 4,
   },
   modeButtonTextActive: {
@@ -658,14 +658,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 8,
-    backgroundColor: "#2D2D2D",
+    backgroundColor: "#F0F0F0",
     borderWidth: 1,
-    borderColor: "#3A3A3A",
+    borderColor: "#D0D0D0",
   },
   settingsButtonText: {
     fontSize: 14,
     fontWeight: "500",
-    color: "#9DA4AE",
+    color: "#666666",
     marginLeft: 6,
     marginRight: 4,
   },
@@ -677,12 +677,12 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     paddingTop: 20,
     borderTopWidth: 1,
-    borderTopColor: "#2D2D2D",
+    borderTopColor: "#E0E0E0",
   },
   settingsTitle: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#FFFFFF",
+    color: "#333333",
     marginBottom: 16,
   },
   settingsContainer: {
@@ -698,7 +698,7 @@ const styles = StyleSheet.create({
   settingLabel: {
     fontSize: 14,
     fontWeight: "500",
-    color: "#FFFFFF",
+    color: "#333333",
     flex: 1,
   },
   settingControls: {
@@ -709,28 +709,28 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: "#2D2D2D",
+    backgroundColor: "#F0F0F0",
     borderWidth: 1,
-    borderColor: "#3A3A3A",
+    borderColor: "#D0D0D0",
     alignItems: "center",
     justifyContent: "center",
   },
   controlButtonText: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#FFFFFF",
+    color: "#333333",
   },
   settingValue: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#FFFFFF",
+    color: "#333333",
     marginHorizontal: 12,
     minWidth: 30,
     textAlign: "center",
   },
   settingDescription: {
     fontSize: 14,
-    color: "#9DA4AE",
+    color: "#666666",
     lineHeight: 20,
     textAlign: "center",
   },

@@ -258,7 +258,7 @@ export default function FriendsPage() {
         <Image source={{ uri: user.avatar_url }} style={styles.avatar} />
       ) : (
         <View style={styles.avatarPlaceholder}>
-          <Feather name="user" size={20} color="#FFFFFF" />
+          <Feather name="user" size={20} color="#666666" />
         </View>
       )}
     </View>
@@ -282,7 +282,7 @@ export default function FriendsPage() {
             <Image source={{ uri: friend.avatar_url }} style={styles.avatar} />
           ) : (
             <View style={styles.avatarPlaceholder}>
-              <Feather name="user" size={20} color="#FFFFFF" />
+              <Feather name="user" size={20} color="#666666" />
             </View>
           )}
           {/* Online status indicator */}
@@ -453,7 +453,7 @@ export default function FriendsPage() {
             )}
             {friends.length === 0 ? (
               <View style={styles.emptyState}>
-                <Ionicons name="people-outline" color="#6B7280" size={48} />
+                <Ionicons name="people-outline" color="#CCCCCC" size={48} />
                 <Text style={styles.emptyStateTitle}>No Friends Yet</Text>
                 <Text style={styles.emptyStateText}>
                   Start building your study network by adding friends!
@@ -494,7 +494,7 @@ export default function FriendsPage() {
             {pendingRequests.received.length === 0 &&
               pendingRequests.sent.length === 0 && (
                 <View style={styles.emptyState}>
-                  <MaterialIcons name="access-time" color="#6B7280" size={48} />
+                  <MaterialIcons name="access-time" color="#CCCCCC" size={48} />
                   <Text style={styles.emptyStateTitle}>
                     No Pending Requests
                   </Text>
@@ -510,11 +510,11 @@ export default function FriendsPage() {
         return (
           <View style={styles.tabContent}>
             <View style={styles.searchContainer}>
-              <Feather name="search" color="#6B7280" size={20} />
+              <Feather name="search" color="#666666" size={20} />
               <TextInput
                 style={styles.searchInput}
                 placeholder="Search by username or name..."
-                placeholderTextColor="#6B7280"
+                placeholderTextColor="#999999"
                 value={searchQuery}
                 onChangeText={setSearchQuery}
                 autoCapitalize="none"
@@ -524,7 +524,7 @@ export default function FriendsPage() {
             <ScrollView style={styles.searchResults}>
               {searchQuery.length >= 2 && searchResults.length === 0 ? (
                 <View style={styles.emptyState}>
-                  <Feather name="search" color="#6B7280" size={48} />
+                  <Feather name="search" color="#CCCCCC" size={48} />
                   <Text style={styles.emptyStateTitle}>No Users Found</Text>
                   <Text style={styles.emptyStateText}>
                     Try searching for a different username or name
@@ -532,7 +532,7 @@ export default function FriendsPage() {
                 </View>
               ) : searchQuery.length < 2 ? (
                 <View style={styles.emptyState}>
-                  <Feather name="search" color="#6B7280" size={48} />
+                  <Feather name="search" color="#CCCCCC" size={48} />
                   <Text style={styles.emptyStateTitle}>Find Friends</Text>
                   <Text style={styles.emptyStateText}>
                     Search for users by username or full name
@@ -643,7 +643,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 20,
     fontWeight: "600",
-    color: "#FFFFFF",
+    color: "#333333",
   },
   tabBar: {
     flexDirection: "row",
@@ -659,10 +659,13 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderRadius: 8,
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    backgroundColor: "rgba(248, 248, 248, 0.8)",
+    borderWidth: 1,
+    borderColor: "rgba(0, 0, 0, 0.1)",
   },
   activeTab: {
-    backgroundColor: "rgba(59, 130, 246, 0.1)",
+    backgroundColor: "rgba(59, 130, 246, 0.15)",
+    borderColor: "rgba(59, 130, 246, 0.3)",
   },
   tabText: {
     color: "#6B7280",
@@ -695,9 +698,16 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     padding: 16,
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    backgroundColor: "rgba(248, 248, 248, 0.8)",
     borderRadius: 12,
     marginBottom: 8,
+    borderWidth: 1,
+    borderColor: "rgba(0, 0, 0, 0.1)",
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
   avatarContainer: {
     marginRight: 12,
@@ -712,7 +722,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    backgroundColor: "rgba(0, 0, 0, 0.1)",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -724,19 +734,19 @@ const styles = StyleSheet.create({
     height: 12,
     borderRadius: 6,
     borderWidth: 2,
-    borderColor: "#1F2937",
+    borderColor: "#FFFFFF",
   },
   userInfo: {
     flex: 1,
   },
   userName: {
-    color: "#FFFFFF",
+    color: "#333333",
     fontSize: 16,
     fontWeight: "600",
     marginBottom: 2,
   },
   userHandle: {
-    color: "#9CA3AF",
+    color: "#666666",
     fontSize: 14,
   },
   onlineStatus: {
@@ -819,15 +829,17 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    backgroundColor: "rgba(248, 248, 248, 0.8)",
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 12,
     marginBottom: 16,
+    borderWidth: 1,
+    borderColor: "rgba(0, 0, 0, 0.1)",
   },
   searchInput: {
     flex: 1,
-    color: "#FFFFFF",
+    color: "#333333",
     fontSize: 16,
     marginLeft: 12,
   },
@@ -835,7 +847,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   sectionTitle: {
-    color: "#FFFFFF",
+    color: "#333333",
     fontSize: 18,
     fontWeight: "600",
     marginBottom: 12,
@@ -848,14 +860,14 @@ const styles = StyleSheet.create({
     paddingVertical: 40,
   },
   emptyStateTitle: {
-    color: "#FFFFFF",
+    color: "#333333",
     fontSize: 18,
     fontWeight: "600",
     marginTop: 16,
     marginBottom: 8,
   },
   emptyStateText: {
-    color: "#9CA3AF",
+    color: "#666666",
     fontSize: 14,
     textAlign: "center",
     paddingHorizontal: 32,

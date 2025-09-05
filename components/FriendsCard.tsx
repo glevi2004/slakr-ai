@@ -432,17 +432,9 @@ export default function FriendsCard() {
                   <Ionicons name="play-circle" size={14} color="#4CAF50" />
                 </View>
                 {isExpanded ? (
-                  <Ionicons
-                    name="chevron-up"
-                    size={16}
-                    color="rgba(255, 255, 255, 0.6)"
-                  />
+                  <Ionicons name="chevron-up" size={16} color="#666666" />
                 ) : (
-                  <Ionicons
-                    name="chevron-down"
-                    size={16}
-                    color="rgba(255, 255, 255, 0.6)"
-                  />
+                  <Ionicons name="chevron-down" size={16} color="#666666" />
                 )}
               </View>
             )}
@@ -496,7 +488,7 @@ export default function FriendsCard() {
     <View style={styles.friendsCard}>
       <View style={styles.friendsHeader}>
         <View style={styles.titleContainer}>
-          <Ionicons name="people-outline" size={18} color="#FFFFFF" />
+          <Ionicons name="people-outline" size={18} color="#333333" />
           <Tooltip
             text={`${sortedFriends.length} friend${
               sortedFriends.length === 1 ? "" : "s"
@@ -515,11 +507,7 @@ export default function FriendsCard() {
       >
         {sortedFriends.length === 0 ? (
           <View style={styles.emptyContainer}>
-            <Ionicons
-              name="people-outline"
-              size={48}
-              color="rgba(255, 255, 255, 0.3)"
-            />
+            <Ionicons name="people-outline" size={48} color="#CCCCCC" />
             <Text style={styles.emptyText}>No friends yet</Text>
             <Text style={styles.emptySubtext}>
               Add friends to see them on the leaderboard
@@ -535,15 +523,17 @@ export default function FriendsCard() {
 
 const styles = StyleSheet.create({
   friendsCard: {
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    backgroundColor: "#F9F9F9",
     borderRadius: 20,
     marginBottom: 16,
     overflow: "hidden",
     shadowColor: "#000000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
   },
   loadingContainer: {
     padding: 40,
@@ -551,7 +541,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   loadingText: {
-    color: "rgba(255, 255, 255, 0.6)",
+    color: "#666666",
     fontSize: 14,
     marginTop: 12,
   },
@@ -571,7 +561,7 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     paddingHorizontal: 20,
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(255, 255, 255, 0.08)",
+    borderBottomColor: "#E0E0E0",
   },
   titleContainer: {
     flexDirection: "row",
@@ -581,7 +571,7 @@ const styles = StyleSheet.create({
   friendsTitle: {
     fontSize: 20,
     fontWeight: "700",
-    color: "#FFFFFF",
+    color: "#333333",
     marginLeft: 12,
     letterSpacing: -0.3,
   },
@@ -599,20 +589,20 @@ const styles = StyleSheet.create({
   },
   activeModeButton: {},
   inactiveModeButton: {
-    backgroundColor: "rgba(255, 255, 255, 0.03)",
+    backgroundColor: "#F0F0F0",
     opacity: 0.5,
   },
   modeButtonText: {
     fontSize: 12,
     fontWeight: "600",
-    color: "rgba(255, 255, 255, 0.5)",
+    color: "#666666",
   },
   activeModeButtonText: {
-    color: "rgba(255, 255, 255, 0.7)",
+    color: "#333333",
     fontWeight: "700",
   },
   inactiveModeButtonText: {
-    color: "rgba(255, 255, 255, 0.3)",
+    color: "#999999",
   },
   friendsList: {
     maxHeight: 400,
@@ -624,15 +614,15 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   friendCard: {
-    backgroundColor: "rgba(255, 255, 255, 0.03)",
+    backgroundColor: "#FFFFFF",
     borderRadius: 16,
     padding: 16,
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.05)",
+    borderColor: "#E0E0E0",
   },
   clickableFriendCard: {
-    borderColor: "rgba(76, 175, 80, 0.2)",
-    backgroundColor: "rgba(76, 175, 80, 0.05)",
+    borderColor: "#4CAF50",
+    backgroundColor: "#F0F8F0",
   },
   friendMainContent: {
     flexDirection: "row",
@@ -642,7 +632,7 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    backgroundColor: "#F0F0F0",
     alignItems: "center",
     justifyContent: "center",
     marginRight: 12,
@@ -650,7 +640,7 @@ const styles = StyleSheet.create({
   rankText: {
     fontSize: 14,
     fontWeight: "700",
-    color: "rgba(255, 255, 255, 0.8)",
+    color: "#333333",
   },
   friendImageContainer: {
     position: "relative",
@@ -660,7 +650,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    backgroundColor: "#F0F0F0",
   },
   onlineIndicator: {
     position: "absolute",
@@ -669,9 +659,11 @@ const styles = StyleSheet.create({
     width: 16,
     height: 16,
     borderRadius: 8,
-    backgroundColor: "#000000",
+    backgroundColor: "#FFFFFF",
     alignItems: "center",
     justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
   },
   onlineDot: {
     width: 10,
@@ -685,7 +677,7 @@ const styles = StyleSheet.create({
   friendName: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#FFFFFF",
+    color: "#333333",
     letterSpacing: -0.2,
   },
   friendStats: {
@@ -699,7 +691,7 @@ const styles = StyleSheet.create({
   },
   statText: {
     fontSize: 13,
-    color: "rgba(255, 255, 255, 0.7)",
+    color: "#666666",
     fontWeight: "500",
   },
   emptyContainer: {
@@ -711,13 +703,13 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 18,
     fontWeight: "600",
-    color: "rgba(255, 255, 255, 0.6)",
+    color: "#666666",
     marginTop: 16,
     textAlign: "center",
   },
   emptySubtext: {
     fontSize: 14,
-    color: "rgba(255, 255, 255, 0.4)",
+    color: "#999999",
     marginTop: 8,
     textAlign: "center",
   },
@@ -731,17 +723,17 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: "rgba(76, 175, 80, 0.2)",
+    backgroundColor: "#E8F5E8",
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: "rgba(76, 175, 80, 0.4)",
+    borderColor: "#4CAF50",
   },
   dropdownContent: {
     marginTop: 12,
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: "rgba(255, 255, 255, 0.1)",
+    borderTopColor: "#E0E0E0",
   },
   sessionDetails: {
     flexDirection: "row",
@@ -759,7 +751,7 @@ const styles = StyleSheet.create({
   },
   sessionTimeLabel: {
     fontSize: 14,
-    color: "rgba(255, 255, 255, 0.6)",
+    color: "#666666",
     fontWeight: "500",
   },
   sessionTime: {
@@ -769,7 +761,7 @@ const styles = StyleSheet.create({
   },
   sessionTitle: {
     fontSize: 13,
-    color: "rgba(255, 255, 255, 0.5)",
+    color: "#999999",
     fontStyle: "italic",
   },
 });

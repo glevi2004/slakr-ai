@@ -23,8 +23,8 @@ export default function StatsChip({
       style={[
         styles.container,
         {
-          backgroundColor: "#1A1A1A",
-          borderColor: "rgba(255, 255, 255, 0.1)",
+          backgroundColor: "rgba(248, 248, 248, 0.8)",
+          borderColor: "rgba(0, 0, 0, 0.1)",
         },
       ]}
     >
@@ -36,12 +36,10 @@ export default function StatsChip({
         </View>
 
         <View style={styles.textContainer}>
-          <Text style={[styles.value, { color: "#FFFFFF" }]}>
+          <Text style={[styles.value, { color: "#333333" }]}>
             {suffix === "TODO" ? "TODO" : `${value}${suffix}`}
           </Text>
-          <Text style={[styles.label, { color: "rgba(255, 255, 255, 0.7)" }]}>
-            {label}
-          </Text>
+          <Text style={[styles.label, { color: "#666666" }]}>{label}</Text>
         </View>
       </View>
     </View>
@@ -55,6 +53,11 @@ const styles = StyleSheet.create({
     marginHorizontal: 4,
     overflow: "hidden",
     borderWidth: 1,
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
   content: {
     padding: 16,

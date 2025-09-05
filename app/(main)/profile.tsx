@@ -229,7 +229,7 @@ export default function ProfilePage() {
             style={styles.settingsButton}
             onPress={() => router.push("settings" as any)}
           >
-            <Feather name="settings" size={24} color="#FFFFFF" />
+            <Feather name="settings" size={24} color="#333333" />
           </TouchableOpacity>
         </View>
 
@@ -244,7 +244,7 @@ export default function ProfilePage() {
                 />
               ) : (
                 <View style={styles.avatarPlaceholder}>
-                  <Feather name="user" size={32} color="#FFFFFF" />
+                  <Feather name="user" size={32} color="#666666" />
                 </View>
               )}
             </View>
@@ -387,19 +387,24 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 28,
     fontWeight: "bold",
-    color: "#FFFFFF",
+    color: "#333333",
   },
   settingsButton: {
     padding: 8,
   },
   profileCard: {
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    backgroundColor: "rgba(248, 248, 248, 0.8)",
     borderRadius: 16,
     marginHorizontal: 16,
     marginBottom: 20,
     padding: 20,
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.1)",
+    borderColor: "rgba(0, 0, 0, 0.1)",
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
   },
   profileHeader: {
     flexDirection: "row",
@@ -417,7 +422,7 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    backgroundColor: "rgba(0, 0, 0, 0.1)",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -427,7 +432,7 @@ const styles = StyleSheet.create({
   displayName: {
     fontSize: 22,
     fontWeight: "bold",
-    color: "#FFFFFF",
+    color: "#333333",
     marginBottom: 4,
   },
   username: {
@@ -437,17 +442,17 @@ const styles = StyleSheet.create({
   },
   email: {
     fontSize: 14,
-    color: "rgba(255, 255, 255, 0.6)",
+    color: "#666666",
   },
   bioSection: {
     marginTop: 16,
     paddingTop: 16,
     borderTopWidth: 1,
-    borderTopColor: "rgba(255, 255, 255, 0.1)",
+    borderTopColor: "rgba(0, 0, 0, 0.1)",
   },
   bio: {
     fontSize: 16,
-    color: "rgba(255, 255, 255, 0.8)",
+    color: "#666666",
     lineHeight: 22,
   },
   statsContainer: {
@@ -457,7 +462,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20,
     fontWeight: "600",
-    color: "#FFFFFF",
+    color: "#333333",
     marginBottom: 16,
   },
   statsGrid: {
@@ -466,13 +471,18 @@ const styles = StyleSheet.create({
   },
   statCard: {
     flex: 1,
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    backgroundColor: "rgba(248, 248, 248, 0.8)",
     borderRadius: 12,
     padding: 16,
     alignItems: "center",
     marginHorizontal: 4,
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.1)",
+    borderColor: "rgba(0, 0, 0, 0.1)",
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
   statIcon: {
     marginBottom: 8,
@@ -480,22 +490,27 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 20,
     fontWeight: "bold",
-    color: "#FFFFFF",
+    color: "#333333",
     marginBottom: 4,
   },
   statLabel: {
     fontSize: 12,
-    color: "rgba(255, 255, 255, 0.6)",
+    color: "#666666",
     textAlign: "center",
   },
   infoCard: {
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    backgroundColor: "rgba(248, 248, 248, 0.8)",
     borderRadius: 16,
     marginHorizontal: 16,
     marginBottom: 20,
     padding: 20,
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.1)",
+    borderColor: "rgba(0, 0, 0, 0.1)",
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
   },
   infoRow: {
     flexDirection: "row",
@@ -503,16 +518,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(255, 255, 255, 0.05)",
+    borderBottomColor: "rgba(0, 0, 0, 0.05)",
   },
   infoLabel: {
     fontSize: 16,
-    color: "rgba(255, 255, 255, 0.8)",
+    color: "#666666",
     fontWeight: "500",
   },
   infoValue: {
     fontSize: 16,
-    color: "#FFFFFF",
+    color: "#333333",
     fontWeight: "600",
   },
   achievementsCard: {
@@ -546,13 +561,18 @@ const styles = StyleSheet.create({
     height: 100,
   },
   levelCard: {
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    backgroundColor: "rgba(248, 248, 248, 0.8)",
     borderRadius: 16,
     marginHorizontal: 16,
     marginBottom: 20,
     padding: 20,
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.1)",
+    borderColor: "rgba(0, 0, 0, 0.1)",
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
   },
   levelContainer: {
     marginTop: 12,
@@ -576,19 +596,19 @@ const styles = StyleSheet.create({
   levelTitle: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#FFFFFF",
+    color: "#333333",
     marginBottom: 4,
   },
   levelProgress: {
     fontSize: 14,
-    color: "#9CA3AF",
+    color: "#666666",
   },
   progressBarContainer: {
     marginTop: 8,
   },
   progressBarBackground: {
     height: 8,
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    backgroundColor: "rgba(0, 0, 0, 0.1)",
     borderRadius: 4,
     overflow: "hidden",
   },
@@ -606,13 +626,13 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   academicFieldLabel: {
-    color: "#FFFFFF",
+    color: "#333333",
     fontSize: 16,
     fontWeight: "600",
     marginLeft: 8,
   },
   academicFieldValue: {
-    color: "rgba(255, 255, 255, 0.8)",
+    color: "#666666",
     fontSize: 16,
     paddingLeft: 28,
   },
@@ -626,16 +646,16 @@ const styles = StyleSheet.create({
     marginRight: 20,
   },
   locationBadge: {
-    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    backgroundColor: "rgba(0, 0, 0, 0.1)",
     borderRadius: 12,
     paddingHorizontal: 8,
     paddingVertical: 4,
     marginLeft: 8,
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.2)",
+    borderColor: "rgba(0, 0, 0, 0.2)",
   },
   locationBadgeText: {
-    color: "rgba(255, 255, 255, 0.8)",
+    color: "#666666",
     fontSize: 12,
     fontWeight: "500",
   },

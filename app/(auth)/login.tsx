@@ -1,20 +1,20 @@
+import { AppBackground } from "@/components/AppBackground";
+import { useAuth } from "@/contexts/AuthContext";
+import { LinearGradient } from "expo-linear-gradient";
+import { router } from "expo-router";
 import React, { useState } from "react";
 import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
   Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { LinearGradient } from "expo-linear-gradient";
-import { router } from "expo-router";
-import { AppBackground } from "@/components/AppBackground";
-import { useAuth } from "@/contexts/AuthContext";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
@@ -79,7 +79,7 @@ export default function LoginScreen() {
                     value={email}
                     onChangeText={setEmail}
                     placeholder="Enter your email"
-                    placeholderTextColor="#666"
+                    placeholderTextColor="#999999"
                     keyboardType="email-address"
                     autoCapitalize="none"
                     autoCorrect={false}
@@ -93,7 +93,7 @@ export default function LoginScreen() {
                     value={password}
                     onChangeText={setPassword}
                     placeholder="Enter your password"
-                    placeholderTextColor="#666"
+                    placeholderTextColor="#999999"
                     secureTextEntry
                     autoCapitalize="none"
                   />
@@ -136,7 +136,7 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#000000",
+    backgroundColor: "#FFFFFF",
   },
   container: {
     flex: 1,
@@ -169,20 +169,20 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   backButtonText: {
-    color: "#9DA4AE",
+    color: "#666666",
     fontSize: 16,
     fontWeight: "500",
   },
   title: {
     fontSize: 32,
     fontWeight: "bold",
-    color: "#FFFFFF",
+    color: "#333333",
     marginBottom: 8,
     textAlign: "center",
   },
   subtitle: {
     fontSize: 16,
-    color: "#9DA4AE",
+    color: "#666666",
     textAlign: "center",
   },
   form: {
@@ -194,18 +194,23 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#FFFFFF",
+    color: "#333333",
     marginBottom: 8,
   },
   input: {
-    backgroundColor: "rgba(255, 255, 255, 0.08)",
+    backgroundColor: "rgba(248, 248, 248, 0.8)",
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.15)",
+    borderColor: "rgba(0, 0, 0, 0.1)",
     borderRadius: 12,
     paddingVertical: 16,
     paddingHorizontal: 16,
     fontSize: 16,
-    color: "#FFFFFF",
+    color: "#333333",
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
   loginButton: {
     marginTop: 20,
@@ -229,7 +234,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   registerText: {
-    color: "#9DA4AE",
+    color: "#666666",
     fontSize: 16,
     fontWeight: "500",
   },
