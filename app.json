@@ -17,6 +17,7 @@
       }
     },
     "android": {
+      "package": "com.glevi.slakr_ai",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/icon.png",
         "backgroundColor": "#ffffff"
@@ -46,6 +47,17 @@
         {
           "icon": "./assets/images/icon.png",
           "color": "#ffffff"
+        }
+      ],
+      // Required for Apple Sign-In
+      "expo-apple-authentication",
+      // Required for Google Sign-In
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.<YOUR_GOOGLE_IOS_CLIENT_ID_REVERSED>",
+          "webClientId": "<YOUR_GOOGLE_WEB_CLIENT_ID>",
+          "androidClientId": "<YOUR_GOOGLE_ANDROID_CLIENT_ID>"
         }
       ]
     ],
