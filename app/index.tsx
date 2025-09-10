@@ -1,25 +1,23 @@
-import { useEffect } from "react";
-import { View, Text, StyleSheet } from "react-native";
-import { useRouter } from "expo-router";
-import { useAuth } from "@/contexts/AuthContext";
-import LoadingIndicator from "@/components/LoadingIndicator";
 import { AppBackground } from "@/components/AppBackground";
+import LoadingIndicator from "@/components/LoadingIndicator";
+import { useAuth } from "@/contexts/AuthContext";
+import { useFocusEffect, useRouter } from "expo-router";
+import { useCallback } from "react";
+import { StyleSheet } from "react-native";
 
 export default function Index() {
   const { user, loading } = useAuth();
   const router = useRouter();
 
-  useEffect(() => {
-    if (loading) return; // Wait for auth state to be determined
-
-    if (user) {
-      // User is authenticated, redirect to main app
-      router.replace("/(main)");
-    } else {
-      // User is not authenticated, redirect to landing page
-      router.replace("/(tabs)");
-    }
-  }, [user, loading, router]);
+  useFocusEffect(
+    useCallback(() => {
+      console.log("🔄 Index useFocusEffect - User:", !!user, "Loading:", loading);
+      
+      // TEMPORARY: Always redirect to onboarding for testing
+      console.log("🆕 Forcing redirect to onboarding for testing");
+      router.replace("/(onboarding)/welcome");
+    }, [router, user, loading])
+  );
 
   // Show loading screen while determining auth state
   if (loading) {
